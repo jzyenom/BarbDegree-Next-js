@@ -1,12 +1,14 @@
 import mongoose, { Connection } from "mongoose";
 
+// const MONGODB_URI = process.env.MONGODB_URI!;
+
 const connectToDatabase = async (): Promise<Connection> => {
   try {
     const mongoUri: string =
       process.env.NODE_ENV === "production"
         ? process.env.MONGODB_URI_CLOUD || ""
         : process.env.MONGODB_URI_LOCAL ||
-          "mongodb://localhost:27017/ecommerce";
+          "mongodb://localhost:27017/barbdegree2";
 
     if (!mongoUri) {
       throw new Error(

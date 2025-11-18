@@ -1,0 +1,39 @@
+import { NextRequest, NextResponse } from "next/server";
+import { Paystack } from "paystack-sdk";
+import connectToDatabase from "@/database/dbConnect";
+import Booking from "@/models/Booking";
+import Transaction from "@/models/Transaction";
+
+const paystack = new Paystack(process.env.PAYSTACK_SECRET_KEY!);
+
+export async function GET(req: NextRequest) {
+  await connectToDatabase();
+
+  const url = new URL(req.url);
+  const reference = url.searchParams.get("reference");
+
+  const verify = await paystack.transaction.verify({ reference });
+
+  const status = verify.data.status === "success" ? "success" : "failed";
+
+  await Transaction.findOneAndUpdate(
+    { reference },
+    {
+      status,
+      providerResponse: verify.data,
+    }
+  );
+
+  if (status === "success") {
+    await Booking.findOneAndUpdate(
+      { paymentReference: reference },
+      {
+        paymentStatus: "paid",
+        amountPaid: verify.data.amount / 100,
+        status: "completed",
+      }
+    );
+  }
+
+  return NextResponse.redirect(`${process.env.NEXT_PUBLIC_URL}/transactions`);
+}

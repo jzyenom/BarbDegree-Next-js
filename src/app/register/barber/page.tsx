@@ -63,24 +63,61 @@ export default function BarberSignup() {
   const handleNext = () => setStep((prev) => Math.min(prev + 1, totalSteps));
   const handleBack = () => setStep((prev) => Math.max(prev - 1, 1));
 
+  const validateForm = () => {
+    const requiredFields = ['whatsapp', 'mobile', 'country', 'state', 'nin', 'bio', 'address', 'exp', 'charge', 'bankName', 'accountNo'];
+    for (const field of requiredFields) {
+      if (!formData[field as keyof typeof formData]?.toString().trim()) {
+        alert(`${field.charAt(0).toUpperCase() + field.slice(1)} is required`);
+        return false;
+      }
+    }
+    // Validate phone numbers
+    const phoneRegex = /^\+?[\d\s\-\(\)]+$/;
+    if (!phoneRegex.test(formData.whatsapp) || !phoneRegex.test(formData.mobile)) {
+      alert("Please enter valid phone numbers");
+      return false;
+    }
+    // Validate NIN (assume 11 digits)
+    if (!/^\d{11}$/.test(formData.nin)) {
+      alert("NIN must be 11 digits");
+      return false;
+    }
+    // Validate account number (assume 10 digits)
+    if (!/^\d{10}$/.test(formData.accountNo)) {
+      alert("Account number must be 10 digits");
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) return;
+
+    if (!session?.user?.email) {
+      alert("Session expired. Please login again.");
+      router.push("/login");
+      return;
+    }
 
     try {
       const formDataToSend = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
         if (value) formDataToSend.append(key, value as any);
       });
-      if (session?.user?.email)
-        formDataToSend.append("email", session.user.email);
 
-      await axios.post("/api/barber", formDataToSend, {
+      const response = await axios.post("/api/barber", formDataToSend, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      router.push("/dashboard/barber");
-    } catch (error) {
+      if (response.data.message === "Barber registered successfully") {
+        router.push("/dashboard/barber");
+      }
+    } catch (error: any) {
       console.error("Error submitting barber form", error);
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || "Failed to register. Please try again.";
+      alert(`Error: ${errorMessage}`);
     }
   };
 

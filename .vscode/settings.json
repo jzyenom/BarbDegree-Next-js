@@ -20,5 +20,6 @@
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.tabSize": 2
     },
-    "editor.codeActions.triggerOnFocusChange": true
+    "editor.codeActions.triggerOnFocusChange": true,
+    "WillLuke.nextjs.addTypesOnSave": true
 }

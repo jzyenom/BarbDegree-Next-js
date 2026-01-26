@@ -19,7 +19,7 @@ export default function LoginPage() {
     <AuthLayout
       title="Sign In"
       footerText="Don't have an account?"
-      footerLink="/barber/signup"
+      footerLink="/register"
       footerLinkText="Sign Up"
     >
       <h1 className="text-[22px] font-bold text-center mt-4 mb-3 text-[#1c130d]">

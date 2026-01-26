@@ -160,3 +160,70 @@ export default function ClientBookingForm() {
     </div>
   );
 }
+
+//Updated Booking form 2026
+// "use client";
+
+// import { useState } from "react";
+// import { useRouter } from "next/navigation";
+// import { useSession } from "next-auth/react";
+
+// export default function ClientBookingForm() {
+//   const router = useRouter();
+//   const { data: session } = useSession();
+
+//   const [loading, setLoading] = useState(false);
+//   const [form, setForm] = useState({
+//     name: "",
+//     email: "",
+//     address: "",
+//     service: "",
+//     dateTime: "",
+//     note: "",
+//   });
+
+//   const [price, setPrice] = useState<number>(50);
+
+//   const handleChange = (
+//     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+//   ) => {
+//     setForm({ ...form, [e.target.name]: e.target.value });
+//   };
+
+//   const handleSubmit = async (e: React.FormEvent) => {
+//     e.preventDefault();
+//     setLoading(true);
+
+//     const bookingData = {
+//       ...form,
+//       clientEmail: session?.user?.email,
+//       barberId: "67500bca5c16c62d9a8f6f11",
+//       estimatedPrice: price,
+//     };
+
+//     // Store booking in sessionStorage
+//     sessionStorage.setItem("bookingDraft", JSON.stringify(bookingData));
+
+//     // Navigate to confirm booking page
+//     router.push("/confirm-booking");
+
+//     setLoading(false);
+//   };
+
+//   return (
+//     <div className="min-h-screen bg-white flex flex-col justify-between">
+//       {/* UI unchanged */}
+//       <form onSubmit={handleSubmit} className="max-w-[480px] mx-auto">
+//         {/* ... your fields ... */}
+
+//         <button
+//           type="submit"
+//           disabled={loading}
+//           className="flex flex-1 justify-center rounded-lg h-12 px-5 bg-[#f2800d] text-[#181411] text-base font-bold hover:bg-[#e07000] transition-all"
+//         >
+//           {loading ? "Processing..." : "Proceed to Confirm"}
+//         </button>
+//       </form>
+//     </div>
+//   );
+// }

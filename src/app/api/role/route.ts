@@ -1,20 +1,20 @@
 import { NextResponse } from "next/server";
-// import { dbConnect } from "@/lib/dbConnect";
 import connectToDatabase from "@/database/dbConnect";
 import User from "@/models/User";
 
 export async function POST(req: Request) {
   try {
-    const { email, role } = await req.json();
+    const { role } = await req.json();
+
+    // Validate role
+    if (!role || !["barber", "client"].includes(role)) {
+      return NextResponse.json({ error: "Invalid role" }, { status: 400 });
+    }
+
     await connectToDatabase();
 
-    const user = await User.findOneAndUpdate(
-      { email },
-      { role },
-      { new: true }
-    );
-    if (!user)
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
+    // Create a user document with only the role (no email/username needed)
+    const user = await User.create({ role });
 
     return NextResponse.json({ message: "Role updated", user });
   } catch (error) {

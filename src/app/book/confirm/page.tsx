@@ -7,7 +7,6 @@ import { useSession } from "next-auth/react";
 import HeaderBack from "@/components/ui/HeaderBack";
 import DetailRow from "@/components/ui/DetailRow";
 import BottomNav from "@/components/ui/BottomNav";
-import ButtonRow from "@/components/ui/ButtonRow";
 import { Scissors, Calendar, Clock, MapPin, DollarSign } from "lucide-react";
 import { formatNaira } from "@/lib/format";
 
@@ -56,7 +55,7 @@ export default function ConfirmBookingPage({
 
     try {
       // 1) Create booking (server uses session to set clientId)
-      const createRes = await fetch("/api/booking", {
+      const createRes = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -74,27 +73,11 @@ export default function ConfirmBookingPage({
       if (!createRes.ok) throw new Error(createJson?.error || createJson?.message || "Create failed");
 
       const booking = createJson.booking;
-      setMessage("Booking created. Redirecting to payment...");
-
-      // 2) Initiate Paystack flow (initiate route returns authUrl)
-      const initRes = await fetch("/api/paystack/initiate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bookingId: booking._id }),
-      });
-      const initJson = await initRes.json();
-      if (!initRes.ok) throw new Error(initJson?.error || "Failed to initiate payment");
-
-      const { authUrl } = initJson;
-      if (authUrl) {
-        // redirect to Paystack payment page
-        window.location.href = authUrl;
-      } else {
-        setMessage("Could not get payment URL. Payment can be verified from transactions.");
-      }
-    } catch (err: any) {
+      setMessage("Booking created. Opening checkout...");
+      router.push(`/checkout/${booking._id}`);
+    } catch (err: unknown) {
       console.error(err);
-      setMessage(err.message || "Booking failed");
+      setMessage(err instanceof Error ? err.message : "Booking failed");
     } finally {
       setLoading(false);
     }
@@ -109,7 +92,7 @@ export default function ConfirmBookingPage({
     setMessage(null);
 
     try {
-      const createRes = await fetch("/api/booking", {
+      const createRes = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -125,12 +108,11 @@ export default function ConfirmBookingPage({
       const createJson = await createRes.json();
       if (!createRes.ok) throw new Error(createJson?.error || createJson?.message || "Create failed");
 
-      setMessage("Booking created (pending payment). You can pay later from Transactions.");
-      // redirect to transactions after a short delay
-      setTimeout(() => router.push("/transactions"), 800);
-    } catch (err: any) {
+      setMessage("Booking created. Redirecting to booking details...");
+      setTimeout(() => router.push(`/bookings/${createJson.booking?._id}`), 600);
+    } catch (err: unknown) {
       console.error(err);
-      setMessage(err.message || "Booking failed");
+      setMessage(err instanceof Error ? err.message : "Booking failed");
     } finally {
       setLoading(false);
     }
@@ -174,7 +156,7 @@ export default function ConfirmBookingPage({
                 onClick={handleConfirmAndPay}
                 disabled={loading}
               >
-                {loading ? "Processing…" : "Confirm & Pay"}
+                {loading ? "Processing..." : "Confirm & Checkout"}
               </button>
             </div>
           </div>

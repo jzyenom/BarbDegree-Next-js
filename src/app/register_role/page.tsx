@@ -2,13 +2,33 @@
 
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 
 export default function RoleSelectionPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (status === "loading") return;
+
+    if (!session?.user) {
+      router.replace("/login");
+      return;
+    }
+
+    if (session.user.role) {
+      router.replace(`/dashboard/${session.user.role}`);
+    }
+  }, [router, session, status]);
+
   const handleRoleSelect = async (role: "barber" | "client") => {
+    if (!session?.user?.email) {
+      router.push("/login");
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await axios.post<{ message: string }>("/api/role", {

@@ -10,6 +10,8 @@ import ActionRow from "@/components/ui/ActionRow";
 import HistoryRow from "@/components/ui/HistoryRow";
 import BottomNav from "@/components/ui/BottomNav";
 import { formatNaira } from "@/lib/format";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchBookings } from "@/features/bookings/bookingsSlice";
 
 type Booking = {
   _id: string;
@@ -23,33 +25,16 @@ type Booking = {
 
 export default function TransactionsPage() {
   const { data: session } = useSession();
-  const [bookings, setBookings] = useState<Booking[] | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const dispatch = useAppDispatch();
+  const bookings = useAppSelector((state) => state.bookings.items);
+  const loading = useAppSelector((state) => state.bookings.loading);
   const [serviceFilter, setServiceFilter] = useState<string>("");
   const [from, setFrom] = useState<string>("");
   const [to, setTo] = useState<string>("");
 
   // fetch bookings for logged in user (server filters by session)
   async function fetchData() {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (serviceFilter) params.set("service", serviceFilter);
-      if (from) params.set("from", from);
-      if (to) params.set("to", to);
-
-      const url = `/api/booking?${params.toString()}`;
-      const res = await fetch(url);
-      const json = await res.json();
-      // our API returns { bookings } in secured version
-      const data = Array.isArray(json) ? json : json.bookings ?? json;
-      setBookings(data);
-    } catch (err) {
-      console.error(err);
-      setBookings([]);
-    } finally {
-      setLoading(false);
-    }
+    dispatch(fetchBookings({ service: serviceFilter, from, to }));
   }
 
   useEffect(() => {

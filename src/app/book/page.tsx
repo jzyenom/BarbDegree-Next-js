@@ -1,229 +1,410 @@
 "use client";
 
-import { useState } from "react";
 import axios from "axios";
+import { useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter, useSearchParams } from "next/navigation";
+
+type ServiceItem = {
+  _id: string;
+  name: string;
+  price: number;
+  durationMinutes?: number;
+};
+
+type BarberListItem = {
+  _id: string;
+  name: string;
+  address?: string;
+  state?: string;
+  country?: string;
+  avatar?: string;
+  serviceCount?: number;
+  services?: ServiceItem[];
+};
 
 export default function ClientBookingForm() {
   const { data: session } = useSession();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const barberFromQuery = searchParams.get("barberId") ?? "";
   const [loading, setLoading] = useState(false);
+  const [barbers, setBarbers] = useState<BarberListItem[]>([]);
+  const [barberId, setBarberId] = useState(barberFromQuery);
+  const [services, setServices] = useState<ServiceItem[]>([]);
+  const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
   const [form, setForm] = useState({
     name: "",
     email: "",
     address: "",
-    service: "",
     dateTime: "",
     note: "",
   });
-  const [price, setPrice] = useState<number>(50); // default estimate
+  const [step, setStep] = useState(1);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const selectedBarber = useMemo(
+    () => barbers.find((barber) => barber._id === barberId) ?? null,
+    [barberId, barbers]
+  );
+
+  const selectedServices = useMemo(
+    () =>
+      selectedServiceIds
+        .map((id) => services.find((service) => service._id === id))
+        .filter((service): service is ServiceItem => Boolean(service)),
+    [selectedServiceIds, services]
+  );
+
+  const estimatedPrice = useMemo(
+    () => selectedServices.reduce((sum, service) => sum + (service.price || 0), 0),
+    [selectedServices]
+  );
+
+  useEffect(() => {
+    const loadBarbers = async () => {
+      const res = await fetch("/api/barbers");
+      const json = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setBarbers(Array.isArray(json.barbers) ? json.barbers : []);
+      }
+    };
+
+    loadBarbers();
+  }, []);
+
+  useEffect(() => {
+    setForm((previous) => ({
+      ...previous,
+      name: previous.name || session?.user?.name || "",
+      email: previous.email || session?.user?.email || "",
+    }));
+  }, [session?.user?.email, session?.user?.name]);
+
+  useEffect(() => {
+    setSelectedServiceIds([]);
+
+    if (!barberId) {
+      setServices([]);
+      return;
+    }
+
+    const loadServices = async () => {
+      const res = await fetch(`/api/services?barberId=${barberId}`);
+      const json = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setServices(Array.isArray(json.services) ? json.services : []);
+      } else {
+        setServices([]);
+      }
+    };
+
+    loadServices();
+  }, [barberId]);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
     try {
-      await axios.post("/api/bookings", {
+      const res = await axios.post("/api/bookings", {
         ...form,
         clientEmail: session?.user?.email,
-        barberId: "67500bca5c16c62d9a8f6f11", // replace with dynamic ID later
-        estimatedPrice: price,
+        barberId,
+        serviceIds: selectedServiceIds,
       });
-      alert("Booking submitted successfully!");
-      setForm({ name: "", email: "", address: "", service: "", dateTime: "", note: "" });
-    } catch (err) {
-      console.error(err);
-      alert("Booking failed!");
+      const booking = res.data?.booking;
+      if (booking?._id) {
+        router.push(`/checkout/${booking._id}`);
+      }
+      setForm({ name: "", email: "", address: "", dateTime: "", note: "" });
+      setSelectedServiceIds([]);
+    } catch (error) {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.error || error.message
+        : "Booking failed";
+      alert(message);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleToggleService = (serviceId: string) => {
+    setSelectedServiceIds((previous) =>
+      previous.includes(serviceId)
+        ? previous.filter((id) => id !== serviceId)
+        : [...previous, serviceId]
+    );
+  };
+
+  const canGoNext =
+    (step === 1 && Boolean(barberId)) ||
+    (step === 2 &&
+      form.name.trim() &&
+      form.email.trim() &&
+      form.dateTime.trim()) ||
+    (step === 3 && selectedServiceIds.length > 0);
+
   return (
     <div className="min-h-screen bg-white flex flex-col justify-between">
       <div>
-        {/* Header */}
         <div className="flex items-center bg-white p-4 pb-2 justify-between">
           <h2 className="text-[#181411] text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">
             Book Appointment
           </h2>
         </div>
 
-        {/* Progress dots */}
         <div className="flex justify-center gap-3 py-5">
-          <div className="h-2 w-2 rounded-full bg-[#181411]"></div>
-          <div className="h-2 w-2 rounded-full bg-[#e6e0db]"></div>
-          <div className="h-2 w-2 rounded-full bg-[#e6e0db]"></div>
+          <div
+            className={`h-2 w-2 rounded-full ${step >= 1 ? "bg-[#181411]" : "bg-[#e6e0db]"}`}
+          />
+          <div
+            className={`h-2 w-2 rounded-full ${step >= 2 ? "bg-[#181411]" : "bg-[#e6e0db]"}`}
+          />
+          <div
+            className={`h-2 w-2 rounded-full ${step >= 3 ? "bg-[#181411]" : "bg-[#e6e0db]"}`}
+          />
         </div>
 
-        {/* Form */}
+        {!barberId && step === 1 && (
+          <p className="px-4 text-sm text-red-600">
+            Please pick a barber before booking.
+          </p>
+        )}
+
         <form onSubmit={handleSubmit} className="max-w-[480px] mx-auto">
-          {["name", "email", "address"].map((field) => (
-            <div key={field} className="px-4 py-3">
-              <label className="flex flex-col min-w-40 flex-1">
-                <p className="text-[#181411] text-base font-medium pb-2 capitalize">{field}</p>
-                <input
-                  name={field}
-                  value={(form as any)[field]}
-                  onChange={handleChange}
-                  placeholder={`Enter your ${field}`}
-                  className="form-input w-full rounded-lg bg-[#f5f2f0] text-[#181411] p-4 h-14 placeholder:text-[#8a7560] focus:ring-0 focus:outline-0 border-none"
-                  required={field !== "address"}
-                />
-              </label>
-            </div>
-          ))}
+          {step === 1 && (
+            <div className="px-4 py-3 space-y-3">
+              <p className="text-[#181411] text-base font-medium pb-1">
+                Select Barber
+              </p>
 
-          {/* Service */}
-          <div className="px-4 py-3">
-            <label className="flex flex-col">
-              <p className="text-[#181411] text-base font-medium pb-2">Select Service</p>
-              <select
-                name="service"
-                value={form.service}
-                onChange={(e) => {
-                  handleChange(e);
-                  if (e.target.value === "Haircut") setPrice(50);
-                  if (e.target.value === "Shave") setPrice(30);
-                  if (e.target.value === "Haircut + Shave") setPrice(70);
-                }}
-                className="form-select w-full rounded-lg bg-[#f5f2f0] text-[#181411] p-4 h-14 focus:ring-0 border-none"
-              >
-                <option value="">Choose a service</option>
-                <option value="Haircut">Haircut</option>
-                <option value="Shave">Shave</option>
-                <option value="Haircut + Shave">Haircut + Shave</option>
-              </select>
-            </label>
-          </div>
+              {barbers.length === 0 && (
+                <div className="rounded-xl border border-dashed border-[#e6e0db] p-4 text-sm text-[#8a7560]">
+                  No barbers are available yet.
+                </div>
+              )}
 
-          {/* Date & Time */}
-          <div className="px-4 py-3">
-            <label className="flex flex-col">
-              <p className="text-[#181411] text-base font-medium pb-2">Date & Time</p>
-              <input
-                type="datetime-local"
-                name="dateTime"
-                value={form.dateTime}
-                onChange={handleChange}
-                className="form-input w-full rounded-lg bg-[#f5f2f0] text-[#181411] p-4 h-14 focus:ring-0 border-none"
-                required
-              />
-            </label>
-          </div>
-
-          {/* Note */}
-          <div className="px-4 py-3">
-            <label className="flex flex-col">
-              <p className="text-[#181411] text-base font-medium pb-2">Note</p>
-              <textarea
-                name="note"
-                value={form.note}
-                onChange={handleChange}
-                placeholder="Add a note (optional)"
-                className="form-textarea w-full min-h-36 rounded-lg bg-[#f5f2f0] text-[#181411] p-4 placeholder:text-[#8a7560] focus:ring-0 border-none"
-              />
-            </label>
-          </div>
-
-          {/* Price */}
-          <div className="p-4">
-            <div
-              className="bg-cover bg-center flex flex-col items-stretch justify-end rounded-lg pt-[132px]"
-              style={{
-                backgroundImage:
-                  "linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 100%), url('https://images.unsplash.com/photo-1595433562696-a8b4e3c5f4ef?auto=format&fit=crop&w=500&q=80')",
-              }}
-            >
-              <div className="flex w-full items-end justify-between gap-4 p-4">
-                <p className="text-white text-2xl font-bold leading-tight flex-1">
-                  Estimated Price: ${price}
-                </p>
+              <div className="grid grid-cols-2 gap-3">
+                {barbers.map((barber) => (
+                  <button
+                    key={barber._id}
+                    type="button"
+                    onClick={() => setBarberId(barber._id)}
+                    className={`rounded-xl border p-3 text-left ${
+                      barberId === barber._id
+                        ? "border-[#f2800d] bg-[#fff4ea]"
+                        : "border-[#eee]"
+                    }`}
+                  >
+                    <div className="h-20 w-full overflow-hidden rounded-lg bg-[#f5f2f0]">
+                      <img
+                        src={barber.avatar || "/avatar.svg"}
+                        alt={barber.name || "Barber"}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                    <p className="pt-2 text-sm font-semibold text-[#181411]">
+                      {barber.name || "Barber"}
+                    </p>
+                    <p className="text-xs text-[#8a7560]">
+                      {barber.address ||
+                        [barber.state, barber.country].filter(Boolean).join(", ")}
+                    </p>
+                    <p className="pt-1 text-xs text-[#8a7560]">
+                      {barber.serviceCount ?? barber.services?.length ?? 0} services
+                    </p>
+                  </button>
+                ))}
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Submit */}
-          <div className="flex px-4 py-3">
+          {step === 2 && (
+            <>
+              {(["name", "email", "address"] as const).map((field) => (
+                <div key={field} className="px-4 py-3">
+                  <label className="flex flex-col min-w-40 flex-1">
+                    <p className="text-[#181411] text-base font-medium pb-2 capitalize">
+                      {field}
+                    </p>
+                    <input
+                      name={field}
+                      value={form[field]}
+                      onChange={handleChange}
+                      placeholder={`Enter your ${field}`}
+                      className="form-input w-full rounded-lg bg-[#f5f2f0] text-[#181411] p-4 h-14 placeholder:text-[#8a7560] focus:ring-0 focus:outline-0 border-none"
+                      required={field !== "address"}
+                    />
+                  </label>
+                </div>
+              ))}
+
+              <div className="px-4 py-3">
+                <label className="flex flex-col">
+                  <p className="text-[#181411] text-base font-medium pb-2">
+                    Date and Time
+                  </p>
+                  <input
+                    type="datetime-local"
+                    name="dateTime"
+                    value={form.dateTime}
+                    onChange={handleChange}
+                    className="form-input w-full rounded-lg bg-[#f5f2f0] text-[#181411] p-4 h-14 focus:ring-0 border-none"
+                    required
+                  />
+                </label>
+              </div>
+
+              <div className="px-4 py-3">
+                <label className="flex flex-col">
+                  <p className="text-[#181411] text-base font-medium pb-2">Note</p>
+                  <textarea
+                    name="note"
+                    value={form.note}
+                    onChange={handleChange}
+                    placeholder="Add a note (optional)"
+                    className="form-textarea w-full min-h-36 rounded-lg bg-[#f5f2f0] text-[#181411] p-4 placeholder:text-[#8a7560] focus:ring-0 border-none"
+                  />
+                </label>
+              </div>
+            </>
+          )}
+
+          {step === 3 && (
+            <div className="px-4 py-6">
+              <div className="rounded-2xl bg-[#3f4a57] p-6 text-white">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold">Select Services</h3>
+                    <p className="text-sm text-white/70">
+                      {selectedBarber?.name
+                        ? `Choose from ${selectedBarber.name}'s active services`
+                        : "Choose one or more services"}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="text-sm font-semibold text-white/80"
+                    onClick={() => setSelectedServiceIds([])}
+                  >
+                    Clear
+                  </button>
+                </div>
+
+                {services.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-white/30 p-4 text-sm text-white/80">
+                    This barber has not added any active services yet.
+                  </div>
+                ) : (
+                  <div className="mt-5 space-y-3">
+                    {services.map((service) => {
+                      const selected = selectedServiceIds.includes(service._id);
+                      return (
+                        <button
+                          key={service._id}
+                          type="button"
+                          onClick={() => handleToggleService(service._id)}
+                          className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition-all ${
+                            selected
+                              ? "border-white bg-white/10"
+                              : "border-white/25 hover:border-white/60"
+                          }`}
+                        >
+                          <div>
+                            <p className="text-sm font-semibold">{service.name}</p>
+                            <p className="text-xs text-white/70">
+                              NGN {service.price} • {service.durationMinutes ?? 30} min
+                            </p>
+                          </div>
+                          <span className="text-xs font-semibold">
+                            {selected ? "Selected" : "Add"}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {selectedServices.length > 0 && (
+                  <div className="mt-6 space-y-2">
+                    {selectedServices.map((service) => (
+                      <div
+                        key={service._id}
+                        className="flex items-center justify-between rounded-lg border border-white/30 px-3 py-2"
+                      >
+                        <div>
+                          <p className="text-sm font-medium">{service.name}</p>
+                          <p className="text-xs text-white/60">
+                            NGN {service.price} • {service.durationMinutes ?? 30} min
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleToggleService(service._id)}
+                          className="text-sm font-bold text-white"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-6">
+                <div
+                  className="bg-cover bg-center flex flex-col items-stretch justify-end rounded-lg pt-[132px]"
+                  style={{
+                    backgroundImage:
+                      "linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 100%), url('https://images.unsplash.com/photo-1595433562696-a8b4e3c5f4ef?auto=format&fit=crop&w=500&q=80')",
+                  }}
+                >
+                  <div className="flex w-full items-end justify-between gap-4 p-4">
+                    <p className="text-white text-2xl font-bold leading-tight flex-1">
+                      Estimated Price: NGN {estimatedPrice}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="flex gap-3 px-4 py-6">
             <button
-              type="submit"
-              disabled={loading}
-              className="flex flex-1 justify-center rounded-lg h-12 px-5 bg-[#f2800d] text-[#181411] text-base font-bold hover:bg-[#e07000] transition-all"
+              type="button"
+              onClick={() => setStep((previous) => Math.max(1, previous - 1))}
+              disabled={step === 1}
+              className="flex-1 h-12 rounded-lg bg-[#f5f2f0] text-[#181411] font-bold disabled:opacity-60"
             >
-              {loading ? "Processing..." : "Proceed to Confirm"}
+              Previous
             </button>
+            {step < 3 ? (
+              <button
+                type="button"
+                disabled={!canGoNext}
+                onClick={() => setStep((previous) => Math.min(3, previous + 1))}
+                className="flex-1 h-12 rounded-lg bg-[#f2800d] text-[#181411] font-bold disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={loading || selectedServiceIds.length === 0}
+                className="flex-1 h-12 rounded-lg bg-[#f2800d] text-[#181411] font-bold disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {loading ? "Processing..." : "Place Order"}
+              </button>
+            )}
           </div>
         </form>
       </div>
     </div>
   );
 }
-
-//Updated Booking form 2026
-// "use client";
-
-// import { useState } from "react";
-// import { useRouter } from "next/navigation";
-// import { useSession } from "next-auth/react";
-
-// export default function ClientBookingForm() {
-//   const router = useRouter();
-//   const { data: session } = useSession();
-
-//   const [loading, setLoading] = useState(false);
-//   const [form, setForm] = useState({
-//     name: "",
-//     email: "",
-//     address: "",
-//     service: "",
-//     dateTime: "",
-//     note: "",
-//   });
-
-//   const [price, setPrice] = useState<number>(50);
-
-//   const handleChange = (
-//     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-//   ) => {
-//     setForm({ ...form, [e.target.name]: e.target.value });
-//   };
-
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-//     setLoading(true);
-
-//     const bookingData = {
-//       ...form,
-//       clientEmail: session?.user?.email,
-//       barberId: "67500bca5c16c62d9a8f6f11",
-//       estimatedPrice: price,
-//     };
-
-//     // Store booking in sessionStorage
-//     sessionStorage.setItem("bookingDraft", JSON.stringify(bookingData));
-
-//     // Navigate to confirm booking page
-//     router.push("/confirm-booking");
-
-//     setLoading(false);
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-white flex flex-col justify-between">
-//       {/* UI unchanged */}
-//       <form onSubmit={handleSubmit} className="max-w-[480px] mx-auto">
-//         {/* ... your fields ... */}
-
-//         <button
-//           type="submit"
-//           disabled={loading}
-//           className="flex flex-1 justify-center rounded-lg h-12 px-5 bg-[#f2800d] text-[#181411] text-base font-bold hover:bg-[#e07000] transition-all"
-//         >
-//           {loading ? "Processing..." : "Proceed to Confirm"}
-//         </button>
-//       </form>
-//     </div>
-//   );
-// }

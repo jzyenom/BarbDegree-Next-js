@@ -1,93 +1,94 @@
-// import GoogleProvider from "next-auth/providers/google";
-// import type { NextAuthOptions } from "next-auth";
-// import connectToDatabase from "@/database/dbConnect";
-// import User from "@/models/User";
-
-// // Validate required env variables
-// if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-//   throw new Error("Missing Google Auth environment variables");
-// }
-
-// export const authOptions: NextAuthOptions = {
-//   providers: [
-//     GoogleProvider({
-//       clientId: process.env.GOOGLE_CLIENT_ID!,
-//       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-//     }),
-//   ],
-
-//   callbacks: {
-//     // CREATE USER IF NOT IN DB
-//     async signIn({ user }) {
-//       await connectToDatabase();
-
-//       const exists = await User.findOne({ email: user.email });
-//       if (!exists) {
-//         await User.create({
-//           name: user.name,
-//           email: user.email,
-//           avatar: user.image,
-//         });
-//       }
-//       return true;
-//     },
-
-//     // ATTACH DB USER ID + ROLE TO SESSION
-//     // async session({ session }) {
-//     //   await connectToDatabase();
-//     //   const dbUser = await User.findOne({ email: session.user?.email });
-
-//     //   if (dbUser && session.user) {
-//     //     session.user.id = dbUser._id.toString();
-//     //     session.user.role = dbUser.role;
-//     //   }
-
-//     //   return session;
-//     // },
-
-//     async session({ session, trigger }) {
-//   await connectToDatabase();
-
-//   // Always fetch fresh user data from DB
-//   const dbUser = await User.findOne({ email: session.user?.email });
-
-//   if (dbUser && session.user) {
-//     session.user.id = dbUser._id.toString();
-//     session.user.role = dbUser.role;
-//   }
-
-//   return session;
-// }
-
-//   },
-// };
-
 import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
 import type { NextAuthOptions } from "next-auth";
 import connectToDatabase from "@/database/dbConnect";
 import User from "@/models/User";
+import bcrypt from "bcryptjs";
 
-if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-  throw new Error("Missing Google Auth environment variables");
+const googleClientId = process.env.GOOGLE_CLIENT_ID;
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+
+const providers = [
+  CredentialsProvider({
+    name: "Credentials",
+    credentials: {
+      email: { label: "Email", type: "email" },
+      password: { label: "Password", type: "password" },
+    },
+    async authorize(credentials) {
+      const email = credentials?.email?.trim().toLowerCase();
+      const password = credentials?.password;
+
+      if (!email || !password) {
+        return null;
+      }
+
+      await connectToDatabase();
+
+      const existingUser = await User.findOne({ email }).select("+password");
+
+      if (!existingUser) {
+        const derivedName = email.split("@")[0];
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const createdUser = await User.create({
+          email,
+          name: derivedName,
+          password: hashedPassword,
+        });
+
+        return {
+          id: createdUser._id.toString(),
+          email: createdUser.email,
+          name: createdUser.name || null,
+          image: createdUser.avatar || null,
+        };
+      }
+
+      if (!existingUser.password) {
+        return null;
+      }
+
+      const isValid = await bcrypt.compare(password, existingUser.password);
+      if (!isValid) {
+        return null;
+      }
+
+      return {
+        id: existingUser._id.toString(),
+        email: existingUser.email,
+        name: existingUser.name || null,
+        image: existingUser.avatar || null,
+      };
+    },
+  }),
+];
+
+if (googleClientId && googleClientSecret) {
+  providers.unshift(
+    GoogleProvider({
+      clientId: googleClientId,
+      clientSecret: googleClientSecret,
+    })
+  );
 }
 
 export const authOptions: NextAuthOptions = {
-  providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
-  ],
+  providers,
 
   callbacks: {
     async signIn({ user }) {
       await connectToDatabase();
 
-      const exists = await User.findOne({ email: user.email });
+      const email = user.email?.toLowerCase();
+      if (!email) {
+        return false;
+      }
+
+      const exists = await User.findOne({ email });
       if (!exists) {
         await User.create({
           name: user.name,
-          email: user.email,
+          email,
           avatar: user.image,
         });
       }
@@ -96,7 +97,8 @@ export const authOptions: NextAuthOptions = {
 
     async session({ session }) {
       await connectToDatabase();
-      const dbUser = await User.findOne({ email: session.user?.email });
+      const email = session.user?.email?.toLowerCase();
+      const dbUser = email ? await User.findOne({ email }) : null;
 
       if (dbUser && session.user) {
         session.user.id = dbUser._id.toString();

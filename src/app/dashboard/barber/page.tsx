@@ -4,7 +4,7 @@ import BarberHeader from "@/components/Barber/BarberHeader";
 import BarberInfoCard from "@/components/Barber/BarberInfoCard";
 import BarberRating from "@/components/Barber/BarberRating";
 import BarberGallery from "@/components/Barber/BarberGallery";
-import BottomNav from "@/components/BottomNav";
+import BottomNav, { barberNavItems } from "@/components/BottomNav";
 
 export default function BarberDashboard() {
   return (
@@ -38,7 +38,7 @@ export default function BarberDashboard() {
         </div>
       </div>
 
-      <BottomNav />
+      <BottomNav items={barberNavItems} activeItem="Home" />
     </div>
   );
 }

@@ -7,8 +7,9 @@ import bcrypt from "bcryptjs";
 
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const providers = [
+const providers: NextAuthOptions["providers"] = [
   CredentialsProvider({
     name: "Credentials",
     credentials: {
@@ -19,7 +20,13 @@ const providers = [
       const email = credentials?.email?.trim().toLowerCase();
       const password = credentials?.password;
 
-      if (!email || !password) {
+      if (
+        !email ||
+        !password ||
+        !EMAIL_PATTERN.test(email) ||
+        password.length < 8 ||
+        password.length > 72
+      ) {
         return null;
       }
 
@@ -73,6 +80,7 @@ if (googleClientId && googleClientSecret) {
 }
 
 export const authOptions: NextAuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET,
   providers,
 
   callbacks: {
@@ -113,4 +121,3 @@ export const authOptions: NextAuthOptions = {
     signIn: "/login", // redirect here for unauthenticated
   },
 };
-

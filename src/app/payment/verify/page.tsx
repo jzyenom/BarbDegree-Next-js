@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 type VerifyResult = {
@@ -11,9 +11,10 @@ type VerifyResult = {
   bookingId: string | null;
 };
 
-export default function PaymentVerifyPage() {
+function PaymentVerifyPageContent() {
   const searchParams = useSearchParams();
-  const reference = searchParams.get("reference") || searchParams.get("trxref") || "";
+  const reference =
+    searchParams?.get("reference") || searchParams?.get("trxref") || "";
 
   const [loading, setLoading] = useState(true);
   const [result, setResult] = useState<VerifyResult | null>(null);
@@ -36,6 +37,9 @@ export default function PaymentVerifyPage() {
         );
         const json = (await res.json()) as VerifyResult & { error?: string };
         if (!res.ok) {
+          if (res.status === 401) {
+            throw new Error("Session expired. Please sign in again to verify payment.");
+          }
           throw new Error(json.error || "Payment verification failed");
         }
 
@@ -130,3 +134,16 @@ export default function PaymentVerifyPage() {
   );
 }
 
+export default function PaymentVerifyPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#faf7f2] flex items-center justify-center p-4">
+          <p className="text-sm text-[#75624e]">Preparing payment verification...</p>
+        </div>
+      }
+    >
+      <PaymentVerifyPageContent />
+    </Suspense>
+  );
+}

@@ -6,7 +6,7 @@ import { requireAuth } from "@/lib/authGuard";
 export async function GET(req: Request) {
   await connectToDatabase();
 
-  const { user, unauthorized } = await requireAuth(req as any);
+  const { user, unauthorized } = await requireAuth(req);
   if (unauthorized)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

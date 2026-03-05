@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
 
   const tx = await Transaction.find({ userId: user.id }).sort({
     createdAt: -1,
-  });
+  }).select("bookingId amount currency reference status provider createdAt updatedAt");
 
   return NextResponse.json({ transactions: tx });
 }

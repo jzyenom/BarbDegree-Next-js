@@ -16,11 +16,12 @@ type BookingDetail = {
   status?: string;
   paymentStatus?: string;
   clientId?: { name?: string; email?: string };
-  barberId?: { userId?: { name?: string } };
+  barberId?: { userId?: { name?: string; email?: string } };
 };
 
 export default function BookingDetailsPage() {
-  const { id } = useParams<{ id: string }>();
+  const params = useParams<{ id: string }>();
+  const id = typeof params?.id === "string" ? params.id : "";
   const router = useRouter();
   const { data: session } = useSession();
   const [booking, setBooking] = useState<BookingDetail | null>(null);
@@ -30,6 +31,12 @@ export default function BookingDetailsPage() {
   const [dateTime, setDateTime] = useState("");
 
   useEffect(() => {
+    if (!id) {
+      setError("Missing booking id");
+      setLoading(false);
+      return;
+    }
+
     const loadBooking = async () => {
       try {
         const res = await fetch(`/api/bookings/${id}`);

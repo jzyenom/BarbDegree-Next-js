@@ -33,8 +33,13 @@ export const fetchServices = createAsyncThunk(
 
     const services = Array.isArray(json.services) ? json.services : [];
     return services.filter(
-      (service): service is Service =>
-        Boolean(service && typeof service === "object" && service._id)
+      (service: unknown): service is Service =>
+        Boolean(
+          service &&
+            typeof service === "object" &&
+            "_id" in service &&
+            service._id
+        )
     );
   }
 );

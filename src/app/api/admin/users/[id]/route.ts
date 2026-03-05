@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import mongoose from "mongoose";
 import connectToDatabase from "@/database/dbConnect";
 import { requireAuth } from "@/lib/authGuard";
 import { AppRole, isAdminRole, isSuperadminRole } from "@/lib/roles";
@@ -32,6 +33,9 @@ export async function PATCH(
   }
 
   const { id } = await params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return NextResponse.json({ error: "Invalid user id" }, { status: 400 });
+  }
   const targetUser = await User.findById(id);
 
   if (!targetUser) {
@@ -96,4 +100,3 @@ export async function PATCH(
     },
   });
 }
-

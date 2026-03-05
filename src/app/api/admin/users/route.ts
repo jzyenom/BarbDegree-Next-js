@@ -5,6 +5,7 @@ import { isAdminRole } from "@/lib/roles";
 import User from "@/models/User";
 import Barber from "@/models/Barber";
 import Client from "@/models/Client";
+import { AppRole } from "@/lib/roles";
 
 type IdLike = { toString(): string } | string;
 
@@ -32,6 +33,12 @@ function toIdString(value: IdLike | null | undefined) {
   return typeof value === "string" ? value : value.toString();
 }
 
+function escapeRegex(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+const ROLE_OPTIONS: AppRole[] = ["client", "barber", "admin", "superadmin"];
+
 export async function GET(req: NextRequest) {
   await connectToDatabase();
 
@@ -45,20 +52,25 @@ export async function GET(req: NextRequest) {
   }
 
   const url = new URL(req.url);
-  const search = url.searchParams.get("search")?.trim();
-  const role = url.searchParams.get("role")?.trim();
-  const limit = Math.min(Number(url.searchParams.get("limit") || 100), 200);
+  const search = url.searchParams.get("search")?.trim() || "";
+  const role = url.searchParams.get("role")?.trim() || "";
+  const requestedLimit = Number(url.searchParams.get("limit") || 100);
+  const parsedLimit = Number.isFinite(requestedLimit)
+    ? Math.floor(requestedLimit)
+    : 100;
+  const limit = Math.min(Math.max(parsedLimit, 1), 200);
 
   const filter: Record<string, unknown> = {};
 
-  if (role) {
+  if (role && ROLE_OPTIONS.includes(role as AppRole)) {
     filter.role = role;
   }
 
   if (search) {
+    const safeSearch = escapeRegex(search.slice(0, 120));
     filter.$or = [
-      { email: { $regex: search, $options: "i" } },
-      { name: { $regex: search, $options: "i" } },
+      { email: { $regex: safeSearch, $options: "i" } },
+      { name: { $regex: safeSearch, $options: "i" } },
     ];
   }
 
@@ -69,10 +81,12 @@ export async function GET(req: NextRequest) {
 
   const userIds = users.map((u) => u._id);
 
-  const [barberProfiles, clientProfiles] = (await Promise.all([
+  const [barberProfilesRaw, clientProfilesRaw] = await Promise.all([
     Barber.find({ userId: { $in: userIds } }).select("_id userId isSubscribed").lean(),
     Client.find({ userId: { $in: userIds } }).select("_id userId").lean(),
-  ])) as [BarberProfileDoc[], ClientProfileDoc[]];
+  ]);
+  const barberProfiles = barberProfilesRaw as unknown as BarberProfileDoc[];
+  const clientProfiles = clientProfilesRaw as unknown as ClientProfileDoc[];
 
   const barberByUserId = new Map(
     barberProfiles.map((b) => [toIdString(b.userId), b])

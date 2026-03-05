@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import mongoose from "mongoose";
 import connectToDatabase from "@/database/dbConnect";
 import Barber from "@/models/Barber";
 import Service from "@/models/Service";
@@ -27,6 +28,9 @@ export async function PUT(
   }
 
   const { id } = await params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return NextResponse.json({ error: "Invalid service id" }, { status: 400 });
+  }
 
   try {
     if (isAdminRole(user.role)) {
@@ -94,6 +98,9 @@ export async function DELETE(
   }
 
   const { id } = await params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return NextResponse.json({ error: "Invalid service id" }, { status: 400 });
+  }
 
   if (isAdminRole(user.role)) {
     await Service.findByIdAndDelete(id);

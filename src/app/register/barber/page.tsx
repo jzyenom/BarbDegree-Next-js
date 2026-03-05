@@ -107,9 +107,13 @@ export default function BarberSignup() {
         if (value) formDataToSend.append(key, value as any);
       });
 
-      const response = await axios.post("/api/barber", formDataToSend, {
+      const response = await axios.post<{ message: string }>(
+        "/api/barber",
+        formDataToSend,
+        {
         headers: { "Content-Type": "multipart/form-data" },
-      });
+        }
+      );
 
       if (response.data.message === "Barber registered successfully") {
         router.push("/dashboard/barber");

@@ -8,7 +8,7 @@ const TransactionSchema = new Schema(
 
     amount: { type: Number, required: true },
     currency: { type: String, default: "NGN" },
-    reference: { type: String, required: true },
+    reference: { type: String, required: true, unique: true, index: true },
 
     status: {
       type: String,
@@ -17,10 +17,12 @@ const TransactionSchema = new Schema(
     },
 
     provider: { type: String, default: "paystack" },
-    providerResponse: { type: Object }, // raw Paystack JSON
+    providerResponse: { type: Schema.Types.Mixed }, // raw Paystack JSON
   },
   { timestamps: true }
 );
+
+TransactionSchema.index({ userId: 1, createdAt: -1 });
 
 export default models.Transaction ||
   mongoose.model("Transaction", TransactionSchema);

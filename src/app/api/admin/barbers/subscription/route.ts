@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import mongoose from "mongoose";
 import connectToDatabase from "@/database/dbConnect";
 import Barber from "@/models/Barber";
 import { requireAuth } from "@/lib/authGuard";
@@ -15,9 +16,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const body = await req.json();
-  const barberId = body.barberId;
+  const body = (await req.json()) as Record<string, unknown>;
+  const barberId = typeof body.barberId === "string" ? body.barberId.trim() : "";
   const isSubscribed = Boolean(body.isSubscribed);
+  if (!mongoose.Types.ObjectId.isValid(barberId)) {
+    return NextResponse.json({ error: "Invalid barber id" }, { status: 400 });
+  }
 
   const barber = await Barber.findByIdAndUpdate(
     barberId,

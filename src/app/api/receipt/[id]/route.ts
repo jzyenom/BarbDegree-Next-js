@@ -2,6 +2,7 @@ export const runtime = "nodejs";
 
 import { PassThrough, Readable } from "stream";
 import { NextRequest, NextResponse } from "next/server";
+import mongoose from "mongoose";
 import PDFDocument from "pdfkit";
 import connectToDatabase from "@/database/dbConnect";
 import { requireAuth } from "@/lib/authGuard";
@@ -102,6 +103,9 @@ export async function GET(
     await connectToDatabase();
 
     const { id } = await params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ error: "Invalid booking id" }, { status: 400 });
+    }
     const booking = (await Booking.findById(id)
       .populate("clientId")
       .populate({ path: "barberId", populate: { path: "userId" } })

@@ -1,7 +1,7 @@
 "use client";
 
 import axios from "axios";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -23,11 +23,17 @@ type BarberListItem = {
   services?: ServiceItem[];
 };
 
-export default function ClientBookingForm() {
+function ClientBookingFormContent() {
   const { data: session } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const barberFromQuery = searchParams.get("barberId") ?? "";
+  const barberFromQuery = searchParams?.get("barberId") ?? "";
+  type CreateBookingResponse = {
+    booking?: {
+      _id?: string;
+    };
+    error?: string;
+  };
   const [loading, setLoading] = useState(false);
   const [barbers, setBarbers] = useState<BarberListItem[]>([]);
   const [barberId, setBarberId] = useState(barberFromQuery);
@@ -112,7 +118,7 @@ export default function ClientBookingForm() {
     setLoading(true);
 
     try {
-      const res = await axios.post("/api/bookings", {
+      const res = await axios.post<CreateBookingResponse>("/api/bookings", {
         ...form,
         clientEmail: session?.user?.email,
         barberId,
@@ -124,10 +130,22 @@ export default function ClientBookingForm() {
       }
       setForm({ name: "", email: "", address: "", dateTime: "", note: "" });
       setSelectedServiceIds([]);
-    } catch (error) {
-      const message = axios.isAxiosError(error)
-        ? error.response?.data?.error || error.message
-        : "Booking failed";
+    } catch (error: unknown) {
+      const responseError =
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        typeof error.response === "object" &&
+        error.response !== null &&
+        "data" in error.response &&
+        typeof error.response.data === "object" &&
+        error.response.data !== null &&
+        "error" in error.response.data &&
+        typeof error.response.data.error === "string"
+          ? error.response.data.error
+          : null;
+      const message =
+        responseError || (error instanceof Error ? error.message : "Booking failed");
       alert(message);
     } finally {
       setLoading(false);
@@ -406,5 +424,19 @@ export default function ClientBookingForm() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function ClientBookingForm() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-white flex items-center justify-center">
+          <p className="text-sm text-[#8a7560]">Loading booking form...</p>
+        </div>
+      }
+    >
+      <ClientBookingFormContent />
+    </Suspense>
   );
 }

@@ -5,52 +5,80 @@ import AuthLayout from "@/components/layouts/AuthLayout";
 import AuthInput from "@/components/AuthInput";
 import { Mail, Lock, Circle } from "lucide-react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isSignupMode = searchParams?.get("mode") === "signup";
+  const requestedRole = searchParams?.get("role");
+  const selectedRole =
+    requestedRole === "barber" || requestedRole === "client"
+      ? requestedRole
+      : null;
+  const callbackUrl = selectedRole
+    ? `/auth/redirect?role=${selectedRole}`
+    : "/auth/redirect";
   const [authMethod, setAuthMethod] = useState<"choice" | "manual">("choice");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
   const handleGoogleLogin = () => {
-    signIn("google", { callbackUrl: "/auth/redirect" });
+    signIn("google", { callbackUrl });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!EMAIL_PATTERN.test(normalizedEmail)) {
+      setError("Enter a valid email address.");
+      return;
+    }
+
+    if (password.length < 8 || password.length > 72) {
+      setError("Password must be between 8 and 72 characters.");
+      return;
+    }
 
     const result = await signIn("credentials", {
-      email,
+      email: normalizedEmail,
       password,
+      intent: isSignupMode ? "signup" : "signin",
       redirect: false,
     });
 
     if (result?.ok) {
-      router.push("/auth/redirect");
+      router.push(callbackUrl);
       return;
     }
 
     setError(
-      "Invalid email or password. If you signed up with Google, use Google sign-in."
+      isSignupMode
+        ? "Unable to create account with that email/password. If this email was created with Google, use Google sign-in first."
+        : "Invalid email or password. If you signed up with Google, use Google sign-in."
     );
   };
 
   return (
     <AuthLayout
-      title="Sign In"
-      footerText="Don't have an account?"
-      footerLink="/register"
-      footerLinkText="Sign Up"
+      title={isSignupMode ? "Sign Up" : "Sign In"}
+      footerText={isSignupMode ? "Already have an account?" : "Don't have an account?"}
+      footerLink={isSignupMode ? "/login" : "/register"}
+      footerLinkText={isSignupMode ? "Sign In" : "Sign Up"}
     >
       <h1 className="text-[22px] font-bold text-center mt-4 mb-3 text-[#1c130d]">
-        Welcome Back
+        {isSignupMode ? "Create Account" : "Welcome Back"}
       </h1>
 
       <p className="text-[#9e6b47] text-sm text-center py-2">
-        Choose how you want to sign in
+        {isSignupMode
+          ? "Choose how you want to create your account"
+          : "Choose how you want to sign in"}
       </p>
 
       {authMethod === "choice" ? (
@@ -103,7 +131,7 @@ export default function LoginPage() {
             type="submit"
             className="w-full h-12 rounded-xl bg-[#f96b06] text-[#fcfaf8] text-base font-bold tracking-wide hover:bg-[#e66105] transition-all shadow-md hover:shadow-lg"
           >
-            Sign In
+            {isSignupMode ? "Sign Up" : "Sign In"}
           </button>
 
           <button
@@ -111,7 +139,7 @@ export default function LoginPage() {
             onClick={() => setAuthMethod("choice")}
             className="w-full h-12 rounded-xl border border-[#e0c4b0] text-[#1c130d] text-sm font-semibold hover:bg-[#faf6f4] transition-all"
           >
-            Back to Sign In Options
+            {isSignupMode ? "Back to Sign Up Options" : "Back to Sign In Options"}
           </button>
         </form>
       )}

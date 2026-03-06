@@ -5,6 +5,15 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 
+type RequestError = {
+  response?: {
+    data?: {
+      message?: string;
+      error?: string;
+    };
+  };
+};
+
 export default function RoleSelectionPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -13,19 +22,14 @@ export default function RoleSelectionPage() {
   useEffect(() => {
     if (status === "loading") return;
 
-    if (!session?.user) {
-      router.replace("/login");
-      return;
-    }
-
-    if (session.user.role) {
+    if (session?.user?.role) {
       router.replace(`/dashboard/${session.user.role}`);
     }
   }, [router, session, status]);
 
   const handleRoleSelect = async (role: "barber" | "client") => {
     if (!session?.user?.email) {
-      router.push("/login");
+      router.push(`/login?mode=signup&role=${role}`);
       return;
     }
 
@@ -35,14 +39,14 @@ export default function RoleSelectionPage() {
         role,
       });
       if (response.data.message === "Role updated") {
-        // Redirect to the appropriate registration page
         router.push(`/register/${role}`);
       }
     } catch (err: unknown) {
       console.error("Role selection failed:", err);
+      const requestError = err as RequestError;
       const errorMessage =
-        (err as any)?.response?.data?.message ||
-        (err as any)?.response?.data?.error ||
+        requestError.response?.data?.message ||
+        requestError.response?.data?.error ||
         "Failed to save role. Please try again.";
       alert(`Error: ${errorMessage}`);
     } finally {
@@ -62,7 +66,7 @@ export default function RoleSelectionPage() {
           disabled={loading}
           className="p-6 rounded-xl border-2 border-gray-200 hover:border-orange-500 hover:bg-orange-50 transition-all disabled:opacity-50"
         >
-          💈 <h2 className="font-semibold mt-2">I'm a Barber</h2>
+          <h2 className="font-semibold mt-2">I&apos;m a Barber</h2>
         </button>
 
         <button
@@ -70,7 +74,7 @@ export default function RoleSelectionPage() {
           disabled={loading}
           className="p-6 rounded-xl border-2 border-gray-200 hover:border-orange-500 hover:bg-orange-50 transition-all disabled:opacity-50"
         >
-          👥 <h2 className="font-semibold mt-2">I'm a Client</h2>
+          <h2 className="font-semibold mt-2">I&apos;m a Client</h2>
         </button>
       </div>
       {loading && <p className="mt-4 text-sm text-gray-500">Saving role...</p>}

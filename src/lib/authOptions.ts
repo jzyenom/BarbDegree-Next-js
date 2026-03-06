@@ -15,10 +15,12 @@ const providers: NextAuthOptions["providers"] = [
     credentials: {
       email: { label: "Email", type: "email" },
       password: { label: "Password", type: "password" },
+      intent: { label: "Intent", type: "text" },
     },
     async authorize(credentials) {
       const email = credentials?.email?.trim().toLowerCase();
       const password = credentials?.password;
+      const intent = credentials?.intent === "signup" ? "signup" : "signin";
 
       if (
         !email ||
@@ -35,6 +37,10 @@ const providers: NextAuthOptions["providers"] = [
       const existingUser = await User.findOne({ email }).select("+password");
 
       if (!existingUser) {
+        if (intent !== "signup") {
+          return null;
+        }
+
         const derivedName = email.split("@")[0];
         const hashedPassword = await bcrypt.hash(password, 10);
         const createdUser = await User.create({

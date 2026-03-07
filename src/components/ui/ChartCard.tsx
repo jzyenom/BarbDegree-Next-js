@@ -1,4 +1,9 @@
 /**
+ * AUTO-FILE-COMMENT: src/components/ui/ChartCard.tsx
+ * Purpose: Explains the role of this module and documents its functions.
+ * Notes: Comments are documentation-only and do not change runtime behavior.
+ */
+/**
  * AUTO-FUNCTION-COMMENT: ChartCard
  * Purpose: Handles chart card.
  * Line-by-line:

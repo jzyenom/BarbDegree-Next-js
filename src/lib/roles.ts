@@ -1,3 +1,8 @@
+/**
+ * AUTO-FILE-COMMENT: src/lib/roles.ts
+ * Purpose: Explains the role of this module and documents its functions.
+ * Notes: Comments are documentation-only and do not change runtime behavior.
+ */
 export type AppRole = "client" | "barber" | "admin" | "superadmin";
 
 /**

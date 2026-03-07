@@ -1,3 +1,8 @@
+/**
+ * AUTO-FILE-COMMENT: src/components/BottomNav.tsx
+ * Purpose: Explains the role of this module and documents its functions.
+ * Notes: Comments are documentation-only and do not change runtime behavior.
+ */
 // import { Home, List, User } from "lucide-react";
 // import Link from "next/link";
 

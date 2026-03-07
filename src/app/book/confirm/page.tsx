@@ -1,3 +1,8 @@
+/**
+ * AUTO-FILE-COMMENT: src/app/book/confirm/page.tsx
+ * Purpose: Explains the role of this module and documents its functions.
+ * Notes: Comments are documentation-only and do not change runtime behavior.
+ */
 "use client";
 
 import { useState } from "react";

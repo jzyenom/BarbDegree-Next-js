@@ -1,3 +1,8 @@
+/**
+ * AUTO-FILE-COMMENT: src/pages/api/socket-io.ts
+ * Purpose: Explains the role of this module and documents its functions.
+ * Notes: Comments are documentation-only and do not change runtime behavior.
+ */
 import { Server } from "socket.io";
 import type { Server as HTTPServer } from "http";
 import type { NextApiRequest } from "next";

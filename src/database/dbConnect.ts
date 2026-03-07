@@ -1,3 +1,8 @@
+/**
+ * AUTO-FILE-COMMENT: src/database/dbConnect.ts
+ * Purpose: Explains the role of this module and documents its functions.
+ * Notes: Comments are documentation-only and do not change runtime behavior.
+ */
 import mongoose, { Connection } from "mongoose";
 
 let cachedConnection: Connection | null = null;

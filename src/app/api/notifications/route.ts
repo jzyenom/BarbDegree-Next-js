@@ -1,3 +1,8 @@
+/**
+ * AUTO-FILE-COMMENT: src/app/api/notifications/route.ts
+ * Purpose: Explains the role of this module and documents its functions.
+ * Notes: Comments are documentation-only and do not change runtime behavior.
+ */
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/database/dbConnect";
 import Notification from "@/models/Notification";

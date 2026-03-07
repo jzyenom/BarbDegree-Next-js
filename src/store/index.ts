@@ -1,3 +1,8 @@
+/**
+ * AUTO-FILE-COMMENT: src/store/index.ts
+ * Purpose: Explains the role of this module and documents its functions.
+ * Notes: Comments are documentation-only and do not change runtime behavior.
+ */
 import { configureStore } from "@reduxjs/toolkit";
 import servicesReducer from "@/features/services/servicesSlice";
 import bookingsReducer from "@/features/bookings/bookingsSlice";

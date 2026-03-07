@@ -1,3 +1,8 @@
+/**
+ * AUTO-FILE-COMMENT: src/app/api/booking/verify/route.ts
+ * Purpose: Explains the role of this module and documents its functions.
+ * Notes: Comments are documentation-only and do not change runtime behavior.
+ */
 import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 import { Paystack } from "paystack-sdk";

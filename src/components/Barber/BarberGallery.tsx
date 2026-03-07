@@ -1,4 +1,9 @@
 /**
+ * AUTO-FILE-COMMENT: src/components/Barber/BarberGallery.tsx
+ * Purpose: Explains the role of this module and documents its functions.
+ * Notes: Comments are documentation-only and do not change runtime behavior.
+ */
+/**
  * AUTO-FUNCTION-COMMENT: BarberGallery
  * Purpose: Handles barber gallery.
  * Line-by-line:

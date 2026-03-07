@@ -1,3 +1,8 @@
+/**
+ * AUTO-FILE-COMMENT: src/lib/format.ts
+ * Purpose: Explains the role of this module and documents its functions.
+ * Notes: Comments are documentation-only and do not change runtime behavior.
+ */
 // src/lib/format.ts
 /**
  * AUTO-FUNCTION-COMMENT: formatNaira

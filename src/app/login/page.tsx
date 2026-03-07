@@ -1,3 +1,8 @@
+/**
+ * AUTO-FILE-COMMENT: src/app/login/page.tsx
+ * Purpose: Explains the role of this module and documents its functions.
+ * Notes: Comments are documentation-only and do not change runtime behavior.
+ */
 "use client";
 
 import { signIn } from "next-auth/react";
@@ -311,6 +316,22 @@ function LoginPageContent() {
   );
 }
 
+/**
+ * AUTO-FUNCTION-COMMENT: LoginPage
+ * Purpose: Handles login page.
+ * Line-by-line:
+ * 1. Executes `return (`.
+ * 2. Executes `<Suspense`.
+ * 3. Executes `fallback={`.
+ * 4. Executes `<div className="flex min-h-screen items-center justify-center bg-[#fcfaf8] text-[#1c130d]">`.
+ * 5. Executes `<p className="text-sm font-medium">Loading sign in...</p>`.
+ * 6. Executes `</div>`.
+ * 7. Executes `}`.
+ * 8. Executes `>`.
+ * 9. Executes `<LoginPageContent />`.
+ * 10. Executes `</Suspense>`.
+ * 11. Executes `);`.
+ */
 export default function LoginPage() {
   return (
     <Suspense

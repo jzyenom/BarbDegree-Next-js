@@ -1,3 +1,8 @@
+/**
+ * AUTO-FILE-COMMENT: src/lib/notify.ts
+ * Purpose: Explains the role of this module and documents its functions.
+ * Notes: Comments are documentation-only and do not change runtime behavior.
+ */
 import Notification from "@/models/Notification";
 import { getSocketServer } from "@/lib/socketServer";
 

@@ -1,3 +1,8 @@
+/**
+ * AUTO-FILE-COMMENT: src/app/dashboard/admin/subscriptions/page.tsx
+ * Purpose: Explains the role of this module and documents its functions.
+ * Notes: Comments are documentation-only and do not change runtime behavior.
+ */
 "use client";
 
 import { useEffect } from "react";

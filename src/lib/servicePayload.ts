@@ -1,3 +1,8 @@
+/**
+ * AUTO-FILE-COMMENT: src/lib/servicePayload.ts
+ * Purpose: Explains the role of this module and documents its functions.
+ * Notes: Comments are documentation-only and do not change runtime behavior.
+ */
 export type ServiceMutationInput = {
   name: string;
   description: string;

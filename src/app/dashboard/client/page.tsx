@@ -1,3 +1,8 @@
+/**
+ * AUTO-FILE-COMMENT: src/app/dashboard/client/page.tsx
+ * Purpose: Explains the role of this module and documents its functions.
+ * Notes: Comments are documentation-only and do not change runtime behavior.
+ */
 "use client";
 
 import { useEffect, useMemo } from "react";
@@ -108,6 +113,30 @@ function formatTime(dateValue: string) {
   });
 }
 
+/**
+ * AUTO-FUNCTION-COMMENT: getBarberDisplayName
+ * Purpose: Handles get barber display name.
+ * Line-by-line:
+ * 1. Executes `if (`.
+ * 2. Executes `typeof value === "object" &&`.
+ * 3. Executes `value !== null &&`.
+ * 4. Executes `"name" in value &&`.
+ * 5. Executes `typeof value.name === "string" &&`.
+ * 6. Executes `value.name.trim()`.
+ * 7. Executes `) {`.
+ * 8. Executes `return value.name;`.
+ * 9. Executes `}`.
+ * 10. Executes `if (`.
+ * 11. Executes `typeof value === "object" &&`.
+ * 12. Executes `value !== null &&`.
+ * 13. Executes `"shopName" in value &&`.
+ * 14. Executes `typeof value.shopName === "string" &&`.
+ * 15. Executes `value.shopName.trim()`.
+ * 16. Executes `) {`.
+ * 17. Executes `return value.shopName;`.
+ * 18. Executes `}`.
+ * 19. Executes `return "Barber";`.
+ */
 function getBarberDisplayName(value: unknown) {
   if (
     typeof value === "object" &&

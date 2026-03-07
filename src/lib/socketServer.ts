@@ -1,3 +1,8 @@
+/**
+ * AUTO-FILE-COMMENT: src/lib/socketServer.ts
+ * Purpose: Explains the role of this module and documents its functions.
+ * Notes: Comments are documentation-only and do not change runtime behavior.
+ */
 import type { Server as IOServer } from "socket.io";
 
 const SOCKET_KEY = "socket.io.server";

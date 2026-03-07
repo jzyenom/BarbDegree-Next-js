@@ -1,3 +1,8 @@
+/**
+ * AUTO-FILE-COMMENT: src/app/api/auth/[...nextauth]/route.ts
+ * Purpose: Explains the role of this module and documents its functions.
+ * Notes: Comments are documentation-only and do not change runtime behavior.
+ */
 import NextAuth from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 

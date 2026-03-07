@@ -1,3 +1,8 @@
+/**
+ * AUTO-FILE-COMMENT: src/app/register/client/page.tsx
+ * Purpose: Explains the role of this module and documents its functions.
+ * Notes: Comments are documentation-only and do not change runtime behavior.
+ */
 "use client";
 
 import { useState } from "react";
@@ -160,6 +165,25 @@ export default function ClientForm() {
 
     let mounted = true;
 
+    /**
+     * AUTO-FUNCTION-COMMENT: verifyRegistrationState
+     * Purpose: Handles verify registration state.
+     * Line-by-line:
+     * 1. Executes `try {`.
+     * 2. Executes `const response = await fetch("/api/client", { cache: "no-store" });`.
+     * 3. Executes `const payload = (await response.json().catch(() => ({}))) as {`.
+     * 4. Executes `exists?: boolean;`.
+     * 5. Executes `};`.
+     * 6. Executes `if (mounted && response.ok && payload.exists) {`.
+     * 7. Executes `router.replace("/dashboard/client");`.
+     * 8. Executes `return;`.
+     * 9. Executes `}`.
+     * 10. Executes `} finally {`.
+     * 11. Executes `if (mounted) {`.
+     * 12. Executes `setCheckingAccess(false);`.
+     * 13. Executes `}`.
+     * 14. Executes `}`.
+     */
     const verifyRegistrationState = async () => {
       try {
         const response = await fetch("/api/client", { cache: "no-store" });

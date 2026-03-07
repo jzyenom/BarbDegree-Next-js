@@ -1,3 +1,8 @@
+/**
+ * AUTO-FILE-COMMENT: src/lib/authGuard.ts
+ * Purpose: Explains the role of this module and documents its functions.
+ * Notes: Comments are documentation-only and do not change runtime behavior.
+ */
 import { getServerSession } from "next-auth";
 import type { Session } from "next-auth";
 import type { NextRequest } from "next/server";

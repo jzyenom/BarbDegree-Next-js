@@ -1,3 +1,8 @@
+/**
+ * AUTO-FILE-COMMENT: src/components/Barber/BarberHeader.tsx
+ * Purpose: Explains the role of this module and documents its functions.
+ * Notes: Comments are documentation-only and do not change runtime behavior.
+ */
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import NotificationsBell from "@/components/NotificationsBell";

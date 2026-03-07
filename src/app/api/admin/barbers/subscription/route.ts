@@ -1,3 +1,8 @@
+/**
+ * AUTO-FILE-COMMENT: src/app/api/admin/barbers/subscription/route.ts
+ * Purpose: Explains the role of this module and documents its functions.
+ * Notes: Comments are documentation-only and do not change runtime behavior.
+ */
 import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
 import connectToDatabase from "@/database/dbConnect";

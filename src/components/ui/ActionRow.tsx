@@ -1,3 +1,8 @@
+/**
+ * AUTO-FILE-COMMENT: src/components/ui/ActionRow.tsx
+ * Purpose: Explains the role of this module and documents its functions.
+ * Notes: Comments are documentation-only and do not change runtime behavior.
+ */
 import { FileText } from "lucide-react";
 
 interface ActionRowProps {

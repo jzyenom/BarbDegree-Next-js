@@ -1,3 +1,8 @@
+/**
+ * AUTO-FILE-COMMENT: src/app/dashboard/barber/bookings/page.tsx
+ * Purpose: Explains the role of this module and documents its functions.
+ * Notes: Comments are documentation-only and do not change runtime behavior.
+ */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -7,6 +12,22 @@ import { fetchBookings, updateBooking } from "@/features/bookings/bookingsSlice"
 import Link from "next/link";
 import BottomNav, { barberNavItems } from "@/components/BottomNav";
 
+/**
+ * AUTO-FUNCTION-COMMENT: getDisplayName
+ * Purpose: Handles get display name.
+ * Line-by-line:
+ * 1. Executes `if (typeof value === "string" && value.trim()) return value;`.
+ * 2. Executes `if (`.
+ * 3. Executes `typeof value === "object" &&`.
+ * 4. Executes `value !== null &&`.
+ * 5. Executes `"name" in value &&`.
+ * 6. Executes `typeof value.name === "string" &&`.
+ * 7. Executes `value.name.trim()`.
+ * 8. Executes `) {`.
+ * 9. Executes `return value.name;`.
+ * 10. Executes `}`.
+ * 11. Executes `return fallback;`.
+ */
 function getDisplayName(value: unknown, fallback: string) {
   if (typeof value === "string" && value.trim()) return value;
   if (

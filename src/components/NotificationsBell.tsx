@@ -1,3 +1,8 @@
+/**
+ * AUTO-FILE-COMMENT: src/components/NotificationsBell.tsx
+ * Purpose: Explains the role of this module and documents its functions.
+ * Notes: Comments are documentation-only and do not change runtime behavior.
+ */
 "use client";
 
 import { useMemo, useState } from "react";
@@ -7,6 +12,15 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { markNotificationRead } from "@/features/notifications/notificationsSlice";
 import type { Notification } from "@/features/notifications/notificationsSlice";
 
+/**
+ * AUTO-FUNCTION-COMMENT: extractBookingId
+ * Purpose: Handles extract booking id.
+ * Line-by-line:
+ * 1. Executes `const raw = notification?.data?.bookingId;`.
+ * 2. Executes `if (!raw) return "";`.
+ * 3. Executes `if (typeof raw === "string") return raw;`.
+ * 4. Executes `return raw._id || raw.$oid || "";`.
+ */
 function extractBookingId(notification: Notification | null): string {
   const raw = notification?.data?.bookingId;
   if (!raw) return "";

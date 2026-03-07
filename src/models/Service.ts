@@ -1,5 +1,11 @@
 import mongoose, { Schema, models } from "mongoose";
 
+/**
+ * AUTO-FUNCTION-COMMENT: normalizeServiceName
+ * Purpose: Handles normalize service name.
+ * Line-by-line:
+ * 1. Executes `value.trim().replace(/\s+/g, " ").toLowerCase()`.
+ */
 const normalizeServiceName = (value: string) =>
   value.trim().replace(/\s+/g, " ").toLowerCase();
 

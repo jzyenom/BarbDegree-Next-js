@@ -1,5 +1,11 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
+type BookingParty = {
+  _id?: string;
+  name?: string;
+  shopName?: string;
+};
+
 export type Booking = {
   _id: string;
   service: string;
@@ -9,7 +15,8 @@ export type Booking = {
   paymentStatus?: string;
   estimatedPrice?: number;
   amountPaid?: number;
-  barberId?: any;
+  barberId?: string | BookingParty | null;
+  clientId?: string | BookingParty | null;
 };
 
 type BookingsState = {

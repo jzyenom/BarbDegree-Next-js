@@ -6,6 +6,24 @@ interface AuthFooterProps {
   linkText?: string;
 }
 
+/**
+ * AUTO-FUNCTION-COMMENT: AuthFooter
+ * Purpose: Handles auth footer.
+ * Line-by-line:
+ * 1. Executes `if (!text) return <div className="h-6 bg-[#fcfaf8]" />;`.
+ * 2. Executes `return (`.
+ * 3. Executes `<footer className="py-4">`.
+ * 4. Executes `<p className="text-[#9e6b47] text-sm text-center underline">`.
+ * 5. Executes `{text}{" "}`.
+ * 6. Executes `{link && linkText && (`.
+ * 7. Executes `<Link href={link} className="hover:text-[#f96b06] font-medium">`.
+ * 8. Executes `{linkText}`.
+ * 9. Executes `</Link>`.
+ * 10. Executes `)}`.
+ * 11. Executes `</p>`.
+ * 12. Executes `</footer>`.
+ * 13. Executes `);`.
+ */
 export default function AuthFooter({ text, link, linkText }: AuthFooterProps) {
   if (!text) return <div className="h-6 bg-[#fcfaf8]" />;
 

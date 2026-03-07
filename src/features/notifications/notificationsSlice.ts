@@ -7,6 +7,9 @@ export type Notification = {
   type?: string;
   read?: boolean;
   createdAt?: string;
+  data?: {
+    bookingId?: string | { _id?: string; $oid?: string };
+  };
 };
 
 type NotificationsState = {
@@ -46,6 +49,12 @@ const notificationsSlice = createSlice({
   name: "notifications",
   initialState,
   reducers: {
+    /**
+     * AUTO-FUNCTION-COMMENT: addNotification
+     * Purpose: Handles add notification.
+     * Line-by-line:
+     * 1. Executes `state.items.unshift(action.payload);`.
+     */
     addNotification(state, action: PayloadAction<Notification>) {
       state.items.unshift(action.payload);
     },

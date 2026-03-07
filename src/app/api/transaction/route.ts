@@ -3,6 +3,19 @@ import connectToDatabase from "@/database/dbConnect";
 import Transaction from "@/models/Transaction";
 import { requireAuth } from "@/lib/authGuard";
 
+/**
+ * AUTO-FUNCTION-COMMENT: GET
+ * Purpose: Handles get.
+ * Line-by-line:
+ * 1. Executes `await connectToDatabase();`.
+ * 2. Executes `const { user, unauthorized } = await requireAuth(req);`.
+ * 3. Executes `if (unauthorized)`.
+ * 4. Executes `return NextResponse.json({ error: "Unauthorized" }, { status: 401 });`.
+ * 5. Executes `const tx = await Transaction.find({ userId: user.id }).sort({`.
+ * 6. Executes `createdAt: -1,`.
+ * 7. Executes `}).select("bookingId amount currency reference status provider createdAt updatedAt");`.
+ * 8. Executes `return NextResponse.json({ transactions: tx });`.
+ */
 export async function GET(req: NextRequest) {
   await connectToDatabase();
 

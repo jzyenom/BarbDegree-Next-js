@@ -3,6 +3,19 @@ import connectToDatabase from "@/database/dbConnect";
 import Notification from "@/models/Notification";
 import { requireAuth } from "@/lib/authGuard";
 
+/**
+ * AUTO-FUNCTION-COMMENT: GET
+ * Purpose: Handles get.
+ * Line-by-line:
+ * 1. Executes `await connectToDatabase();`.
+ * 2. Executes `const { user, unauthorized } = await requireAuth(req);`.
+ * 3. Executes `if (unauthorized)`.
+ * 4. Executes `return NextResponse.json({ error: "Unauthorized" }, { status: 401 });`.
+ * 5. Executes `const notifications = await Notification.find({ userId: user.id })`.
+ * 6. Executes `.sort({ createdAt: -1 })`.
+ * 7. Executes `.limit(50);`.
+ * 8. Executes `return NextResponse.json({ notifications });`.
+ */
 export async function GET(req: Request) {
   await connectToDatabase();
 

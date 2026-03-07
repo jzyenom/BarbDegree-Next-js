@@ -49,7 +49,7 @@ const BookingSchema = new Schema(
     estimatedPrice: { type: Number },
     amountPaid: { type: Number, default: 0 },
 
-    paymentReference: { type: String, trim: true, index: true },
+    paymentReference: { type: String, trim: true },
     paymentStatus: {
       type: String,
       enum: ["pending", "paid", "failed"],

@@ -10,6 +10,22 @@ interface AuthLayoutProps {
   footerLinkText?: string;
 }
 
+/**
+ * AUTO-FUNCTION-COMMENT: AuthLayout
+ * Purpose: Handles auth layout.
+ * Line-by-line:
+ * 1. Executes `return (`.
+ * 2. Executes `<div className="min-h-screen flex flex-col justify-between bg-[#fcfaf8] text-[#1c130d] font-inter">`.
+ * 3. Executes `<AuthHeader title={title} />`.
+ * 4. Executes `<main className="flex flex-col items-center w-full px-4">{children}</main>`.
+ * 5. Executes `<AuthFooter`.
+ * 6. Executes `text={footerText}`.
+ * 7. Executes `link={footerLink}`.
+ * 8. Executes `linkText={footerLinkText}`.
+ * 9. Executes `/>`.
+ * 10. Executes `</div>`.
+ * 11. Executes `);`.
+ */
 export default function AuthLayout({
   title,
   children,

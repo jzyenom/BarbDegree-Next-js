@@ -1,3 +1,23 @@
+/**
+ * AUTO-FUNCTION-COMMENT: HeroBanner
+ * Purpose: Handles hero banner.
+ * Line-by-line:
+ * 1. Executes `return (`.
+ * 2. Executes `<div className="px-4">`.
+ * 3. Executes `<div`.
+ * 4. Executes `className="bg-cover bg-center rounded-xl min-h-[200px] flex flex-col justify-end overflow-hidden"`.
+ * 5. Executes `style={{`.
+ * 6. Executes `backgroundImage:`.
+ * 7. Executes `'linear-gradient(0deg, rgba(0, 0, 0, 0.5), transparent 40%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuAMhPxfnZFiBhXzb_xJF...`.
+ * 8. Executes `}}`.
+ * 9. Executes `>`.
+ * 10. Executes `<p className="text-white text-[28px] font-bold leading-tight p-5">`.
+ * 11. Executes `Find your trusted barber`.
+ * 12. Executes `</p>`.
+ * 13. Executes `</div>`.
+ * 14. Executes `</div>`.
+ * 15. Executes `);`.
+ */
 export default function HeroBanner() {
   return (
     <div className="px-4">

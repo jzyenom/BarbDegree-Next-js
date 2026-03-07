@@ -1,14 +1,27 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 
-export default function AuthRedirectPage() {
+type SelectedRole = "barber" | "client" | null;
+
+function parseSelectedRole(value: string | null): SelectedRole {
+  if (value === "barber" || value === "client") {
+    return value;
+  }
+  return null;
+}
+
+function AuthRedirectPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
   const hasHandledRedirect = useRef(false);
+  const selectedRole = useMemo(
+    () => parseSelectedRole(searchParams?.get("role") ?? null),
+    [searchParams]
+  );
 
   useEffect(() => {
     if (status === "loading" || hasHandledRedirect.current) return;
@@ -26,12 +39,6 @@ export default function AuthRedirectPage() {
       return;
     }
 
-    const requestedRole = searchParams?.get("role");
-    const selectedRole =
-      requestedRole === "barber" || requestedRole === "client"
-        ? requestedRole
-        : null;
-
     if (!selectedRole) {
       hasHandledRedirect.current = true;
       router.replace("/register");
@@ -40,7 +47,7 @@ export default function AuthRedirectPage() {
 
     hasHandledRedirect.current = true;
 
-    (async () => {
+    const persistRoleAndRedirect = async () => {
       try {
         const response = await fetch("/api/role", {
           method: "POST",
@@ -59,12 +66,28 @@ export default function AuthRedirectPage() {
       } catch {
         router.replace("/register");
       }
-    })();
-  }, [router, searchParams, session, status]);
+    };
+
+    void persistRoleAndRedirect();
+  }, [router, selectedRole, session?.user, status]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#fcfaf8] text-[#1c130d]">
       <p className="text-sm font-medium">Redirecting...</p>
     </div>
+  );
+}
+
+export default function AuthRedirectPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-[#fcfaf8] text-[#1c130d]">
+          <p className="text-sm font-medium">Redirecting...</p>
+        </div>
+      }
+    >
+      <AuthRedirectPageContent />
+    </Suspense>
   );
 }

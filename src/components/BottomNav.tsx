@@ -59,6 +59,53 @@ export const barberNavItems: NavItem[] = [
 
 const defaultItems: NavItem[] = clientNavItems;
 
+/**
+ * AUTO-FUNCTION-COMMENT: BottomNav
+ * Purpose: Handles bottom nav.
+ * Line-by-line:
+ * 1. Executes `const navClass =`.
+ * 2. Executes `variant === "light"`.
+ * 3. Executes `? "fixed bottom-0 left-0 right-0 bg-white border-t border-[#efe8e2]"`.
+ * 4. Executes `: "fixed bottom-0 left-0 right-0 bg-content-light/90 dark:bg-content-dark/90 backdrop-blur-sm border-t border-gray-200 dark:border-gray-7...`.
+ * 5. Executes `return (`.
+ * 6. Executes `<nav className={\`${navClass} ${className}\`}>`.
+ * 7. Executes `<div className="flex justify-around h-20 items-center max-w-lg mx-auto">`.
+ * 8. Executes `{items.map(({ name, icon: Icon, active, href = "#" }) => {`.
+ * 9. Executes `const isActive = activeItem ? activeItem === name : !!active;`.
+ * 10. Executes `const itemClass =`.
+ * 11. Executes `variant === "light"`.
+ * 12. Executes `? isActive`.
+ * 13. Executes `? "text-[#ff6900] font-semibold"`.
+ * 14. Executes `: "text-[#ff6900] font-medium"`.
+ * 15. Executes `: isActive`.
+ * 16. Executes `? "text-[#ff6900] font-bold"`.
+ * 17. Executes `: "text-[#ff6900] font-medium";`.
+ * 18. Executes `const iconClass =`.
+ * 19. Executes `variant === "light"`.
+ * 20. Executes `? isActive`.
+ * 21. Executes `? "fill-current stroke-current"`.
+ * 22. Executes `: "fill-transparent stroke-current"`.
+ * 23. Executes `: isActive`.
+ * 24. Executes `? "fill-current stroke-current"`.
+ * 25. Executes `: "fill-transparent stroke-current";`.
+ * 26. Executes `return (`.
+ * 27. Executes `<Link`.
+ * 28. Executes `key={name}`.
+ * 29. Executes `href={href}`.
+ * 30. Executes `className={\`group flex flex-col items-center gap-1 ${itemClass} hover:text-[#ff6900]\`}`.
+ * 31. Executes `>`.
+ * 32. Executes `<Icon`.
+ * 33. Executes `className={\`${iconClass} group-hover:fill-current group-hover:stroke-current\`}`.
+ * 34. Executes `size={22}`.
+ * 35. Executes `/>`.
+ * 36. Executes `<span className="text-xs">{name}</span>`.
+ * 37. Executes `</Link>`.
+ * 38. Executes `);`.
+ * 39. Executes `})}`.
+ * 40. Executes `</div>`.
+ * 41. Executes `</nav>`.
+ * 42. Executes `);`.
+ */
 export default function BottomNav({
   items = defaultItems,
   activeItem,

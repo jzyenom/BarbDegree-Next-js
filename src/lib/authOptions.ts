@@ -98,11 +98,18 @@ const providers: NextAuthOptions["providers"] = [
 
         const derivedName = email.split("@")[0];
         const hashedPassword = await bcrypt.hash(password, 10);
-        const createdUser = await User.create({
-          email,
-          name: derivedName,
-          password: hashedPassword,
-        });
+        let createdUser;
+
+        try {
+          createdUser = await User.create({
+            email,
+            name: derivedName,
+            password: hashedPassword,
+          });
+        } catch (error) {
+          console.error("Credentials signup failed:", error);
+          return null;
+        }
 
         return {
           id: createdUser._id.toString(),
@@ -164,12 +171,17 @@ export const authOptions: NextAuthOptions = {
      * 13. Executes `}`.
      * 14. Executes `return true;`.
      */
-    async signIn({ user }) {
+    async signIn({ user, account }) {
       await connectToDatabase();
 
       const email = user.email?.toLowerCase();
       if (!email) {
         return false;
+      }
+
+      // Credentials users are created/validated in authorize().
+      if (account?.provider === "credentials") {
+        return true;
       }
 
       const exists = await User.findOne({ email });

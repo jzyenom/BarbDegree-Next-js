@@ -1,18 +1,55 @@
-/**
- * AUTO-FILE-COMMENT: src/lib/authOptions.ts
- * Purpose: Explains the role of this module and documents its functions.
- * Notes: Comments are documentation-only and do not change runtime behavior.
- */
-import GoogleProvider from "next-auth/providers/google";
-import CredentialsProvider from "next-auth/providers/credentials";
-import type { NextAuthOptions } from "next-auth";
-import connectToDatabase from "@/database/dbConnect";
-import User from "@/models/User";
 import bcrypt from "bcryptjs";
+import type { NextAuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
+import connectToDatabase from "@/database/dbConnect";
+import {
+  getAuthBaseUrl,
+  getGoogleOAuthConfig,
+  getNextAuthSecret,
+} from "@/lib/env";
+import User from "@/models/User";
 
-const googleClientId = process.env.GOOGLE_CLIENT_ID;
-const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PASSWORD_SALT_ROUNDS = 10;
+
+const authBaseUrl = getAuthBaseUrl();
+const authSecret = getNextAuthSecret();
+const googleOAuth = getGoogleOAuthConfig();
+
+function redactEmail(email?: string | null): string | null {
+  if (!email) {
+    return null;
+  }
+
+  const [localPart, domain] = email.split("@");
+  if (!localPart || !domain) {
+    return email;
+  }
+
+  return `${localPart.slice(0, 2)}***@${domain}`;
+}
+
+function isDuplicateKeyError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    error.code === 11000
+  );
+}
+
+function mapErrorToLogMetadata(error: unknown) {
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    };
+  }
+
+  return { error };
+}
 
 const providers: NextAuthOptions["providers"] = [
   CredentialsProvider({
@@ -22,109 +59,102 @@ const providers: NextAuthOptions["providers"] = [
       password: { label: "Password", type: "password" },
       intent: { label: "Intent", type: "text" },
     },
-    /**
-     * AUTO-FUNCTION-COMMENT: authorize
-     * Purpose: Handles authorize.
-     * Line-by-line:
-     * 1. Executes `const email = credentials?.email?.trim().toLowerCase();`.
-     * 2. Executes `const password = credentials?.password;`.
-     * 3. Executes `const intent = credentials?.intent === "signup" ? "signup" : "signin";`.
-     * 4. Executes `if (`.
-     * 5. Executes `!email ||`.
-     * 6. Executes `!password ||`.
-     * 7. Executes `!EMAIL_PATTERN.test(email) ||`.
-     * 8. Executes `password.length < 8 ||`.
-     * 9. Executes `password.length > 72`.
-     * 10. Executes `) {`.
-     * 11. Executes `return null;`.
-     * 12. Executes `}`.
-     * 13. Executes `await connectToDatabase();`.
-     * 14. Executes `const existingUser = await User.findOne({ email }).select("+password");`.
-     * 15. Executes `if (!existingUser) {`.
-     * 16. Executes `if (intent !== "signup") {`.
-     * 17. Executes `return null;`.
-     * 18. Executes `}`.
-     * 19. Executes `const derivedName = email.split("@")[0];`.
-     * 20. Executes `const hashedPassword = await bcrypt.hash(password, 10);`.
-     * 21. Executes `const createdUser = await User.create({`.
-     * 22. Executes `email,`.
-     * 23. Executes `name: derivedName,`.
-     * 24. Executes `password: hashedPassword,`.
-     * 25. Executes `});`.
-     * 26. Executes `return {`.
-     * 27. Executes `id: createdUser._id.toString(),`.
-     * 28. Executes `email: createdUser.email,`.
-     * 29. Executes `name: createdUser.name || null,`.
-     * 30. Executes `image: createdUser.avatar || null,`.
-     * 31. Executes `};`.
-     * 32. Executes `}`.
-     * 33. Executes `if (!existingUser.password) {`.
-     * 34. Executes `return null;`.
-     * 35. Executes `}`.
-     * 36. Executes `const isValid = await bcrypt.compare(password, existingUser.password);`.
-     * 37. Executes `if (!isValid) {`.
-     * 38. Executes `return null;`.
-     * 39. Executes `}`.
-     * 40. Executes `return {`.
-     * 41. Executes `id: existingUser._id.toString(),`.
-     * 42. Executes `email: existingUser.email,`.
-     * 43. Executes `name: existingUser.name || null,`.
-     * 44. Executes `image: existingUser.avatar || null,`.
-     * 45. Executes `};`.
-     */
     async authorize(credentials) {
       const email = credentials?.email?.trim().toLowerCase();
-      const password = credentials?.password;
+      const password = credentials?.password ?? "";
       const intent = credentials?.intent === "signup" ? "signup" : "signin";
 
       if (
         !email ||
-        !password ||
         !EMAIL_PATTERN.test(email) ||
         password.length < 8 ||
         password.length > 72
       ) {
+        console.warn("[auth][credentials] Rejected invalid credential payload.", {
+          email: redactEmail(email),
+          intent,
+          passwordLength: password.length,
+        });
         return null;
       }
 
-      await connectToDatabase();
+      try {
+        await connectToDatabase();
+      } catch (error) {
+        console.error("[auth][credentials] Database unavailable during authorize.", {
+          email: redactEmail(email),
+          intent,
+          ...mapErrorToLogMetadata(error),
+        });
+        throw new Error("AUTH_DATABASE_ERROR");
+      }
 
-      const existingUser = await User.findOne({ email }).select("+password");
+      let existingUser: InstanceType<typeof User> | null = null;
+
+      try {
+        existingUser = await User.findOne({ email }).select("+password role");
+      } catch (error) {
+        console.error("[auth][credentials] Failed to load user record.", {
+          email: redactEmail(email),
+          intent,
+          ...mapErrorToLogMetadata(error),
+        });
+        throw new Error("AUTH_DATABASE_ERROR");
+      }
 
       if (!existingUser) {
         if (intent !== "signup") {
+          console.info("[auth][credentials] Sign-in failed because user was not found.", {
+            email: redactEmail(email),
+          });
           return null;
         }
 
         const derivedName = email.split("@")[0];
-        const hashedPassword = await bcrypt.hash(password, 10);
-        let createdUser;
+        const hashedPassword = await bcrypt.hash(password, PASSWORD_SALT_ROUNDS);
 
         try {
-          createdUser = await User.create({
+          const createdUser = await User.create({
             email,
             name: derivedName,
             password: hashedPassword,
           });
-        } catch (error) {
-          console.error("Credentials signup failed:", error);
-          return null;
-        }
 
-        return {
-          id: createdUser._id.toString(),
-          email: createdUser.email,
-          name: createdUser.name || null,
-          image: createdUser.avatar || null,
-        };
+          return {
+            id: createdUser._id.toString(),
+            email: createdUser.email,
+            name: createdUser.name || null,
+            image: createdUser.avatar || null,
+            role: createdUser.role,
+          };
+        } catch (error) {
+          if (isDuplicateKeyError(error)) {
+            console.warn("[auth][credentials] Duplicate signup detected.", {
+              email: redactEmail(email),
+            });
+            return null;
+          }
+
+          console.error("[auth][credentials] Failed to create user during signup.", {
+            email: redactEmail(email),
+            ...mapErrorToLogMetadata(error),
+          });
+          throw new Error("AUTH_DATABASE_ERROR");
+        }
       }
 
       if (!existingUser.password) {
+        console.info("[auth][credentials] Sign-in blocked for passwordless account.", {
+          email: redactEmail(email),
+        });
         return null;
       }
 
       const isValid = await bcrypt.compare(password, existingUser.password);
       if (!isValid) {
+        console.info("[auth][credentials] Sign-in failed because password mismatch.", {
+          email: redactEmail(email),
+        });
         return null;
       }
 
@@ -133,96 +163,170 @@ const providers: NextAuthOptions["providers"] = [
         email: existingUser.email,
         name: existingUser.name || null,
         image: existingUser.avatar || null,
+        role: existingUser.role,
       };
     },
   }),
 ];
 
-if (googleClientId && googleClientSecret) {
+if (googleOAuth.enabled) {
   providers.unshift(
     GoogleProvider({
-      clientId: googleClientId,
-      clientSecret: googleClientSecret,
+      clientId: googleOAuth.clientId!,
+      clientSecret: googleOAuth.clientSecret!,
     })
   );
 }
 
+console.info("[auth] Initializing auth configuration.", {
+  authBaseUrl: authBaseUrl ?? "auto",
+  googleEnabled: googleOAuth.enabled,
+  nodeEnv: process.env.NODE_ENV,
+});
+
 export const authOptions: NextAuthOptions = {
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: authSecret,
+  debug: process.env.NODE_ENV !== "production",
   providers,
-
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60,
+  },
+  useSecureCookies: process.env.NODE_ENV === "production",
+  logger: {
+    error(code, metadata) {
+      console.error(`[next-auth][${code}]`, metadata);
+    },
+    warn(code) {
+      console.warn(`[next-auth][${code}]`);
+    },
+    debug(code, metadata) {
+      if (process.env.NODE_ENV !== "production") {
+        console.debug(`[next-auth][${code}]`, metadata);
+      }
+    },
+  },
   callbacks: {
-    /**
-     * AUTO-FUNCTION-COMMENT: signIn
-     * Purpose: Handles sign in.
-     * Line-by-line:
-     * 1. Executes `await connectToDatabase();`.
-     * 2. Executes `const email = user.email?.toLowerCase();`.
-     * 3. Executes `if (!email) {`.
-     * 4. Executes `return false;`.
-     * 5. Executes `}`.
-     * 6. Executes `const exists = await User.findOne({ email });`.
-     * 7. Executes `if (!exists) {`.
-     * 8. Executes `await User.create({`.
-     * 9. Executes `name: user.name,`.
-     * 10. Executes `email,`.
-     * 11. Executes `avatar: user.image,`.
-     * 12. Executes `});`.
-     * 13. Executes `}`.
-     * 14. Executes `return true;`.
-     */
     async signIn({ user, account }) {
-      await connectToDatabase();
+      const provider = account?.provider ?? "unknown";
+      const email = user.email?.trim().toLowerCase();
 
-      const email = user.email?.toLowerCase();
       if (!email) {
+        console.warn("[auth] Blocked sign-in because provider returned no email.", {
+          provider,
+        });
         return false;
       }
 
-      // Credentials users are created/validated in authorize().
-      if (account?.provider === "credentials") {
+      if (provider === "credentials") {
         return true;
       }
 
-      const exists = await User.findOne({ email });
-      if (!exists) {
-        await User.create({
-          name: user.name,
-          email,
-          avatar: user.image,
+      try {
+        await connectToDatabase();
+
+        const existingUser = await User.findOne({ email }).select("_id role");
+
+        if (!existingUser) {
+          const createdUser = await User.create({
+            name: user.name ?? email.split("@")[0],
+            email,
+            avatar: user.image,
+          });
+
+          user.id = createdUser._id.toString();
+          user.role = createdUser.role;
+        } else {
+          user.id = existingUser._id.toString();
+          user.role = existingUser.role;
+        }
+
+        return true;
+      } catch (error) {
+        console.error("[auth] Failed to sync OAuth user with the database.", {
+          email: redactEmail(email),
+          provider,
+          ...mapErrorToLogMetadata(error),
+        });
+        return "/login?error=AccountSyncFailed";
+      }
+    },
+    async jwt({ token, user }) {
+      const email = (user?.email ?? token.email)?.trim().toLowerCase();
+
+      if (!email) {
+        return token;
+      }
+
+      token.email = email;
+
+      if (user?.id) {
+        token.sub = user.id;
+      }
+
+      if (user?.role) {
+        token.role = user.role;
+      }
+
+      try {
+        await connectToDatabase();
+        const dbUser = await User.findOne({ email }).select("_id role");
+
+        if (dbUser) {
+          token.sub = dbUser._id.toString();
+          token.role = dbUser.role;
+        }
+      } catch (error) {
+        console.error("[auth][jwt] Failed to hydrate token from the database.", {
+          email: redactEmail(email),
+          ...mapErrorToLogMetadata(error),
         });
       }
-      return true;
+
+      return token;
     },
+    async session({ session, token }) {
+      if (!session.user) {
+        return session;
+      }
 
-    /**
-     * AUTO-FUNCTION-COMMENT: session
-     * Purpose: Handles session.
-     * Line-by-line:
-     * 1. Executes `await connectToDatabase();`.
-     * 2. Executes `const email = session.user?.email?.toLowerCase();`.
-     * 3. Executes `const dbUser = email ? await User.findOne({ email }) : null;`.
-     * 4. Executes `if (dbUser && session.user) {`.
-     * 5. Executes `session.user.id = dbUser._id.toString();`.
-     * 6. Executes `session.user.role = dbUser.role;`.
-     * 7. Executes `}`.
-     * 8. Executes `return session;`.
-     */
-    async session({ session }) {
-      await connectToDatabase();
-      const email = session.user?.email?.toLowerCase();
-      const dbUser = email ? await User.findOne({ email }) : null;
+      if (typeof token.email === "string") {
+        session.user.email = token.email;
+      }
 
-      if (dbUser && session.user) {
-        session.user.id = dbUser._id.toString();
-        session.user.role = dbUser.role;
+      if (typeof token.sub === "string") {
+        session.user.id = token.sub;
+      }
+
+      if (typeof token.role === "string") {
+        session.user.role = token.role;
       }
 
       return session;
     },
-  },
+    async redirect({ url, baseUrl }) {
+      const resolvedBaseUrl = authBaseUrl ?? baseUrl;
+      const resolvedBaseOrigin = new URL(resolvedBaseUrl).origin;
 
+      if (url.startsWith("/")) {
+        return new URL(url, resolvedBaseUrl).toString();
+      }
+
+      try {
+        const callbackUrl = new URL(url);
+
+        if (callbackUrl.origin === resolvedBaseOrigin) {
+          return callbackUrl.toString();
+        }
+      } catch {
+        console.warn("[auth] Rejected malformed callback URL.", { url });
+      }
+
+      return new URL("/auth/redirect", resolvedBaseUrl).toString();
+    },
+  },
   pages: {
-    signIn: "/login", // redirect here for unauthenticated
+    signIn: "/login",
+    error: "/login",
   },
 };

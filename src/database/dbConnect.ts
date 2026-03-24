@@ -1,74 +1,54 @@
-/**
- * AUTO-FILE-COMMENT: src/database/dbConnect.ts
- * Purpose: Explains the role of this module and documents its functions.
- * Notes: Comments are documentation-only and do not change runtime behavior.
- */
 import mongoose, { Connection } from "mongoose";
+import { getMongoUri } from "@/lib/env";
 
-let cachedConnection: Connection | null = null;
+type MongooseCache = {
+  connection: Connection | null;
+  promise: Promise<typeof mongoose> | null;
+};
 
-/**
- * AUTO-FUNCTION-COMMENT: connectToDatabase
- * Purpose: Handles connect to database.
- * Line-by-line:
- * 1. Executes `if (cachedConnection && cachedConnection.readyState >= 1) {`.
- * 2. Executes `return cachedConnection;`.
- * 3. Executes `}`.
- * 4. Executes `if (mongoose.connection.readyState >= 1) {`.
- * 5. Executes `cachedConnection = mongoose.connection;`.
- * 6. Executes `return cachedConnection;`.
- * 7. Executes `}`.
- * 8. Executes `try {`.
- * 9. Executes `const mongoUri: string =`.
- * 10. Executes `process.env.NODE_ENV === "production"`.
- * 11. Executes `? process.env.MONGODB_URI_CLOUD || ""`.
- * 12. Executes `: process.env.MONGODB_URI_LOCAL ||`.
- * 13. Executes `"mongodb://localhost:27017/barbdegree2";`.
- * 14. Executes `if (!mongoUri) {`.
- * 15. Executes `throw new Error(`.
- * 16. Executes `"MongoDB URI is not defined in the environment variables."`.
- * 17. Executes `);`.
- * 18. Executes `}`.
- * 19. Executes `const { connection } = await mongoose.connect(mongoUri);`.
- * 20. Executes `if (connection.readyState >= 1) {`.
- * 21. Executes `console.log("Database Connected");`.
- * 22. Executes `cachedConnection = connection;`.
- * 23. Executes `}`.
- * 24. Executes `return connection;`.
- * 25. Executes `} catch (error) {`.
- * 26. Executes `console.error("Database connection failed:", error);`.
- * 27. Executes `throw error;`.
- * 28. Executes `}`.
- */
+declare global {
+  // eslint-disable-next-line no-var
+  var mongooseCache: MongooseCache | undefined;
+}
+
+const globalCache = globalThis as typeof globalThis & {
+  mongooseCache?: MongooseCache;
+};
+
+const mongooseCache = globalCache.mongooseCache ?? {
+  connection: null,
+  promise: null,
+};
+
+globalCache.mongooseCache = mongooseCache;
+
 const connectToDatabase = async (): Promise<Connection> => {
-  if (cachedConnection && cachedConnection.readyState >= 1) {
-    return cachedConnection;
+  if (mongooseCache.connection?.readyState === 1) {
+    return mongooseCache.connection;
   }
-  
-  // Check if we have an existing mongoose connection not in our cache variable
-  if (mongoose.connection.readyState >= 1) {
-    cachedConnection = mongoose.connection;
-    return cachedConnection;
+
+  if (!mongooseCache.promise) {
+    const mongoUri = getMongoUri();
+
+    mongooseCache.promise = mongoose.connect(mongoUri, {
+      bufferCommands: false,
+      serverSelectionTimeoutMS: 10000,
+    });
   }
 
   try {
-    const mongoUri =
-      process.env.MONGODB_URI ||
-      (process.env.NODE_ENV === "production"
-        ? process.env.MONGODB_URI_CLOUD
-        : process.env.MONGODB_URI_LOCAL) ||
-      "mongodb://localhost:27017/barbdegree2";
+    const mongooseInstance = await mongooseCache.promise;
+    mongooseCache.connection = mongooseInstance.connection;
 
-    const { connection } = await mongoose.connect(mongoUri);
-
-    if (connection.readyState >= 1) {
-      console.log("Database Connected");
-      cachedConnection = connection;
+    if (mongooseCache.connection.readyState !== 1) {
+      throw new Error("MongoDB connection did not reach the connected state.");
     }
 
-    return connection;
+    return mongooseCache.connection;
   } catch (error) {
-    console.error("Database connection failed:", error);
+    mongooseCache.promise = null;
+    mongooseCache.connection = null;
+    console.error("[db] Database connection failed.", error);
     throw error;
   }
 };

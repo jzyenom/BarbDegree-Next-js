@@ -22,7 +22,10 @@ type BarberListItem = {
   address?: string;
   state?: string;
   country?: string;
-  charge?: string;
+  location?: string;
+  rating?: number | null;
+  reviews?: number;
+  charge?: string | number;
   avatar?: string;
 };
 
@@ -218,6 +221,7 @@ export default function ClientHome() {
               !error &&
               barbers.map((barber) => {
                 const location =
+                  barber.location?.trim() ||
                   barber.address?.trim() ||
                   [barber.state, barber.country].filter(Boolean).join(", ");
                 const charge = barber.charge ? Number(barber.charge) : null;
@@ -228,6 +232,8 @@ export default function ClientHome() {
                     name={barber.name}
                     location={location}
                     price={Number.isNaN(charge) ? null : charge}
+                    rating={barber.rating}
+                    reviews={barber.reviews}
                     image={barber.avatar || ""}
                     href={`/book?barberId=${barber._id}`}
                   />

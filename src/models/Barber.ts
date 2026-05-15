@@ -21,6 +21,7 @@ const BarberSchema = new Schema(
     address: { type: String, trim: true, maxlength: 300 },
     avatar: { type: String, default: "avatar.png" },
     isSubscribed: { type: Boolean, default: false },
+    shop: { type: Schema.Types.ObjectId, ref: "Shop" },
   },
   {
     timestamps: true,
@@ -33,6 +34,12 @@ BarberSchema.index({ userId: 1 }, { unique: true });
 
 BarberSchema.virtual("services", {
   ref: "Service",
+  localField: "_id",
+  foreignField: "barberId",
+});
+
+BarberSchema.virtual("reviews", {
+  ref: "Review",
   localField: "_id",
   foreignField: "barberId",
 });

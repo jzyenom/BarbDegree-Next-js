@@ -9,10 +9,12 @@ import connectToDatabase from "@/database/dbConnect";
 import Barber from "@/models/Barber";
 import Service from "@/models/Service";
 import { requireAuth } from "@/lib/authGuard";
+import { ensureDefaultServicesForBarber } from "@/lib/defaultServices";
 import { isAdminRole } from "@/lib/roles";
 import { parseServicePayload } from "@/lib/servicePayload";
 
 type BarberWithServices = {
+  _id: { toString(): string };
   services?: unknown[];
   toObject(options?: { virtuals?: boolean }): { services?: unknown[] };
 };
@@ -88,6 +90,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Invalid barber id" }, { status: 400 });
     }
 
+    const existingBarber = await Barber.findById(barberId).select("_id");
+    if (!existingBarber) {
+      return NextResponse.json({ error: "Barber not found" }, { status: 404 });
+    }
+
+    await ensureDefaultServicesForBarber(existingBarber._id);
+
     const barber = (await Barber.findById(barberId).populate({
       path: "services",
       match: { isActive: true },
@@ -124,7 +133,14 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ services: [] });
   }
 
-  return NextResponse.json({ services: readVirtualServices(barber) });
+  await ensureDefaultServicesForBarber(barber._id);
+
+  const barberWithDefaults = (await Barber.findOne({ userId: user.id }).populate({
+    path: "services",
+    options: { sort: { createdAt: -1 } },
+  })) as BarberWithServices | null;
+
+  return NextResponse.json({ services: readVirtualServices(barberWithDefaults) });
 }
 
 /**

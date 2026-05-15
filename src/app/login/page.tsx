@@ -73,7 +73,11 @@ function LoginPageContent() {
           return;
         }
 
-        setHasGoogleProvider(Boolean(providers?.google));
+        const googleEnabled = Boolean(providers?.google);
+        setHasGoogleProvider(googleEnabled);
+        if (!googleEnabled) {
+          setAuthMethod("manual");
+        }
       } catch (providerError) {
         console.error("[login] Failed to load auth providers.", providerError);
 
@@ -114,13 +118,14 @@ function LoginPageContent() {
     setError("");
 
     const normalizedEmail = email.trim().toLowerCase();
+    const trimmedPassword = password.trim();
 
     if (!EMAIL_PATTERN.test(normalizedEmail)) {
       setError("Enter a valid email address.");
       return;
     }
 
-    if (password.length < 8 || password.length > 72) {
+    if (trimmedPassword.length < 8 || trimmedPassword.length > 72) {
       setError("Password must be between 8 and 72 characters.");
       return;
     }
@@ -130,7 +135,7 @@ function LoginPageContent() {
     try {
       const result = await signIn("credentials", {
         email: normalizedEmail,
-        password,
+        password: trimmedPassword,
         intent: isSignupMode ? "signup" : "signin",
         callbackUrl,
         redirect: false,

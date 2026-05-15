@@ -23,6 +23,12 @@
 # misc
 .DS_Store
 *.pem
+/.qodo/
+/.vscode/
+/prisma/
+/docs/
+/keys.csv
+/Keys.csv
 
 # debug
 npm-debug.log*

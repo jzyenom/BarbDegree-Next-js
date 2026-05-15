@@ -6,6 +6,7 @@
 "use client";
 
 import { Provider } from "react-redux";
+import type { Session } from "next-auth";
 import { SessionProvider, useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { store } from "@/store";
@@ -85,9 +86,15 @@ function SocketManager() {
  * 7. Executes `</SessionProvider>`.
  * 8. Executes `);`.
  */
-export default function Providers({ children }: { children: React.ReactNode }) {
+export default function Providers({
+  children,
+  session,
+}: {
+  children: React.ReactNode;
+  session: Session | null;
+}) {
   return (
-    <SessionProvider>
+    <SessionProvider session={session}>
       <Provider store={store}>
         <SocketManager />
         {children}

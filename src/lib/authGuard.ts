@@ -16,7 +16,7 @@ const emptyUser: AuthenticatedUser = {
   id: "",
 };
 
-/**
+ /**
  * AUTO-FUNCTION-COMMENT: requireAuth
  * Purpose: Handles require auth.
  * Line-by-line:
@@ -30,6 +30,14 @@ const emptyUser: AuthenticatedUser = {
  * 8. Executes `};`.
  */
 export async function requireAuth(_req?: Request | NextRequest) {
+  if (!authOptions.secret) {
+    if (process.env.NODE_ENV === "production") {
+      console.error("[authGuard] Auth secret is not configured");
+      return { user: emptyUser, unauthorized: true as const };
+    }
+    console.warn("[authGuard] Auth secret is not configured; proceeding in development mode.");
+  }
+
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {

@@ -9,6 +9,7 @@ import type { NextApiRequest } from "next";
 import type { NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
 import { getSocketServer, setSocketServer } from "@/lib/socketServer";
+import { getNextAuthSecret } from "@/lib/env";
 import connectToDatabase from "@/database/dbConnect";
 import User from "@/models/User";
 
@@ -85,9 +86,14 @@ export default function handler(req: NextApiRequest, res: NextApiResponseWithSoc
 
     io.use(async (socket, next) => {
       try {
+        const secret = getNextAuthSecret();
+        if (!secret) {
+          return next(new Error("Auth secret not configured"));
+        }
+
         const token = await getToken({
           req: socket.request as NextApiRequest,
-          secret: process.env.NEXTAUTH_SECRET,
+          secret,
         });
         const email =
           typeof token?.email === "string" ? token.email.trim().toLowerCase() : "";

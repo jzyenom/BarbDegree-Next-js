@@ -10,6 +10,7 @@ import Barber from "@/models/Barber";
 import Booking from "@/models/Booking";
 import Service from "@/models/Service";
 import { requireAuth } from "@/lib/authGuard";
+import { ensureDefaultServicesForBarber } from "@/lib/defaultServices";
 import { notifyUser } from "@/lib/notify";
 import { isAdminRole } from "@/lib/roles";
 
@@ -520,6 +521,8 @@ export async function POST(req: NextRequest) {
       { status: 403 }
     );
   }
+
+  await ensureDefaultServicesForBarber(barber._id);
 
   const requestedServiceIds = collectServiceIds(body);
   if (requestedServiceIds.length === 0) {

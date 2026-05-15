@@ -3,17 +3,28 @@
  * Purpose: Explains the role of this module and documents its functions.
  * Notes: Comments are documentation-only and do not change runtime behavior.
  */
+import { randomUUID } from "crypto";
+import { mkdir, writeFile } from "fs/promises";
+import path from "path";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import connectToDatabase from "@/database/dbConnect";
 import User from "@/models/User";
 import Barber from "@/models/Barber";
+import { ensureDefaultServicesForBarber } from "@/lib/defaultServices";
 import { isAdminRole } from "@/lib/roles";
 
 const PHONE_PATTERN = /^\+?[\d\s\-()]+$/;
 const MAX_TEXT_LENGTH = 200;
 const MAX_BIO_LENGTH = 800;
+const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
+const AVATAR_DIR = path.join(process.cwd(), "public", "uploads", "avatars");
+const ALLOWED_AVATAR_TYPES = new Map([
+  ["image/jpeg", "jpg"],
+  ["image/png", "png"],
+  ["image/webp", "webp"],
+]);
 
 /**
  * AUTO-FUNCTION-COMMENT: normalizeField
@@ -49,6 +60,23 @@ function normalizeField(
   }
 
   return { ok: true as const, value: normalized };
+}
+
+async function saveAvatar(file: File) {
+  const extension = ALLOWED_AVATAR_TYPES.get(file.type);
+  if (!extension) {
+    return { ok: false as const, error: "Avatar must be a JPEG, PNG, or WebP image" };
+  }
+  if (file.size <= 0 || file.size > MAX_AVATAR_BYTES) {
+    return { ok: false as const, error: "Avatar must be between 1 byte and 2MB" };
+  }
+
+  const bytes = Buffer.from(await file.arrayBuffer());
+  const filename = `${randomUUID()}.${extension}`;
+  await mkdir(AVATAR_DIR, { recursive: true });
+  await writeFile(path.join(AVATAR_DIR, filename), bytes);
+
+  return { ok: true as const, value: `/uploads/avatars/${filename}` };
 }
 
 /**
@@ -212,10 +240,14 @@ export async function POST(req: Request) {
 
     const formData = await req.formData();
     const data: Record<string, unknown> = {};
+    let avatarFile: File | null = null;
 
     // Ignore files and only process known scalar fields
     formData.forEach((value, key) => {
-      if (value instanceof File) return;
+      if (value instanceof File) {
+        if (key === "avatar" && value.size > 0) avatarFile = value;
+        return;
+      }
       data[key] = value;
     });
 
@@ -291,7 +323,17 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Barber profile already exists" }, { status: 400 });
     }
 
-    await Barber.create({
+    let avatar: string | undefined;
+    if (avatarFile) {
+      const savedAvatar = await saveAvatar(avatarFile);
+      if (!savedAvatar.ok) {
+        return NextResponse.json({ error: savedAvatar.error }, { status: 400 });
+      }
+      avatar = savedAvatar.value;
+      await User.findByIdAndUpdate(user._id, { avatar });
+    }
+
+    const barber = await Barber.create({
       userId: user._id,
       whatsapp: whatsapp.value,
       mobile: mobile.value,
@@ -304,7 +346,9 @@ export async function POST(req: Request) {
       charge: charge.value,
       bankName: bankName.value,
       accountNo: accountNo.value,
+      ...(avatar ? { avatar } : {}),
     });
+    await ensureDefaultServicesForBarber(barber._id);
 
     return NextResponse.json({ message: "Barber registered successfully" });
   } catch (error) {

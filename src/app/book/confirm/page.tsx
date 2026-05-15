@@ -227,6 +227,7 @@ export default function ConfirmBookingPage({
       // 1) Create booking (server uses session to set clientId)
       const createRes = await fetch("/api/bookings", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           barberId: payload.barberId,

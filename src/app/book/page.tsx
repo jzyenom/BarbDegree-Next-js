@@ -565,15 +565,28 @@ function ClientBookingFormContent() {
    */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!session?.user?.id) {
+      alert("Please sign in before placing a booking.");
+      router.push("/login");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const res = await axios.post<CreateBookingResponse>("/api/bookings", {
-        ...form,
-        clientEmail: session?.user?.email,
-        barberId,
-        serviceIds: selectedServiceIds,
-      });
+      const res = await axios.post<CreateBookingResponse>(
+        "/api/bookings",
+        {
+          ...form,
+          clientEmail: session.user.email,
+          barberId,
+          serviceIds: selectedServiceIds,
+        },
+        {
+          withCredentials: true,
+        }
+      );
       const booking = res.data?.booking;
       if (booking?._id) {
         router.push(`/checkout/${booking._id}`);

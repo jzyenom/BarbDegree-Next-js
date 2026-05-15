@@ -58,7 +58,7 @@ export function getAuthBaseUrl(): string | undefined {
 }
 
 export function getNextAuthSecret(): string | undefined {
-  const secret = readEnv("NEXTAUTH_SECRET") ?? readEnv("AUTH_SECRET");
+  const secret = readEnv("NEXTAUTH_SECRET") ?? readEnv("AUTH_SECRET") ?? readEnv("JWT_SECRET");
 
   if (!secret && isProduction) {
     throw new Error("[env] Missing NEXTAUTH_SECRET (or AUTH_SECRET) in production.");

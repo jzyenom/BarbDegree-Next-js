@@ -13,7 +13,7 @@ import User from "@/models/User";
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASSWORD_SALT_ROUNDS = 10;
 
-const authBaseUrl = getAuthBaseUrl();
+const authBaseUrl = getAuthBaseUrl() ?? "http://localhost:3000";
 const authSecret = getNextAuthSecret();
 const googleOAuth = getGoogleOAuthConfig();
 
@@ -61,8 +61,10 @@ const providers: NextAuthOptions["providers"] = [
     },
     async authorize(credentials) {
       const email = credentials?.email?.trim().toLowerCase();
-      const password = credentials?.password ?? "";
+      const password = credentials?.password?.trim() ?? "";
       const intent = credentials?.intent === "signup" ? "signup" : "signin";
+
+      console.log("[auth][credentials] Authorize called for", redactEmail(email), "intent:", intent);
 
       if (
         !email ||
@@ -92,7 +94,7 @@ const providers: NextAuthOptions["providers"] = [
       let existingUser: InstanceType<typeof User> | null = null;
 
       try {
-        existingUser = await User.findOne({ email }).select("+password role");
+        existingUser = await User.findOne({ email }).select("+password");
       } catch (error) {
         console.error("[auth][credentials] Failed to load user record.", {
           email: redactEmail(email),
@@ -104,11 +106,13 @@ const providers: NextAuthOptions["providers"] = [
 
       if (!existingUser) {
         if (intent !== "signup") {
+          console.log("[auth][credentials] Signin failed: user not found");
           console.info("[auth][credentials] Sign-in failed because user was not found.", {
             email: redactEmail(email),
           });
           return null;
         }
+        console.log("[auth][credentials] Creating user for", redactEmail(email));
 
         const derivedName = email.split("@")[0];
         const hashedPassword = await bcrypt.hash(password, PASSWORD_SALT_ROUNDS);
@@ -120,6 +124,7 @@ const providers: NextAuthOptions["providers"] = [
             password: hashedPassword,
           });
 
+          console.log("[auth][credentials] Authorize success for", redactEmail(email));
           return {
             id: createdUser._id.toString(),
             email: createdUser.email,
@@ -144,6 +149,7 @@ const providers: NextAuthOptions["providers"] = [
       }
 
       if (!existingUser.password) {
+        console.log("[auth][credentials] Signin blocked: passwordless account");
         console.info("[auth][credentials] Sign-in blocked for passwordless account.", {
           email: redactEmail(email),
         });
@@ -152,12 +158,14 @@ const providers: NextAuthOptions["providers"] = [
 
       const isValid = await bcrypt.compare(password, existingUser.password);
       if (!isValid) {
+        console.log("[auth][credentials] Signin failed: password mismatch");
         console.info("[auth][credentials] Sign-in failed because password mismatch.", {
           email: redactEmail(email),
         });
         return null;
       }
 
+      console.log("[auth][credentials] Authorize success for", redactEmail(email));
       return {
         id: existingUser._id.toString(),
         email: existingUser.email,
@@ -188,11 +196,26 @@ export const authOptions: NextAuthOptions = {
   secret: authSecret,
   debug: process.env.NODE_ENV !== "production",
   providers,
+  jwt: {
+    maxAge: 30 * 24 * 60 * 60,
+  },
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60,
+    updateAge: 24 * 60 * 60,
   },
-  useSecureCookies: process.env.NODE_ENV === "production",
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 30 * 24 * 60 * 60,
+      },
+    },
+  },
   logger: {
     error(code, metadata) {
       console.error(`[next-auth][${code}]`, metadata);
@@ -207,11 +230,21 @@ export const authOptions: NextAuthOptions = {
     },
   },
   callbacks: {
-    async signIn({ user, account }) {
+    async signIn({ user, account, email, credentials }) {
       const provider = account?.provider ?? "unknown";
-      const email = user.email?.trim().toLowerCase();
+      const callbackEmail = typeof email === "string" ? email : undefined;
+      const credentialEmail =
+        credentials &&
+        typeof credentials === "object" &&
+        "email" in credentials &&
+        typeof credentials.email === "string"
+          ? credentials.email
+          : undefined;
+      const authEmail = (callbackEmail || credentialEmail || user.email)?.trim().toLowerCase();
 
-      if (!email) {
+      console.log("[auth] signIn called for provider:", provider, "email:", redactEmail(authEmail));
+
+      if (!authEmail) {
         console.warn("[auth] Blocked sign-in because provider returned no email.", {
           provider,
         });
@@ -225,18 +258,20 @@ export const authOptions: NextAuthOptions = {
       try {
         await connectToDatabase();
 
-        const existingUser = await User.findOne({ email }).select("_id role");
+        const existingUser = await User.findOne({ email: authEmail }).select("_id role");
 
         if (!existingUser) {
+          console.log("[auth] Creating user for OAuth", redactEmail(authEmail));
           const createdUser = await User.create({
-            name: user.name ?? email.split("@")[0],
-            email,
+            name: user.name ?? authEmail.split("@")[0],
+            email: authEmail,
             avatar: user.image,
           });
 
           user.id = createdUser._id.toString();
           user.role = createdUser.role;
         } else {
+          console.log("[auth] OAuth signin for existing user", redactEmail(authEmail));
           user.id = existingUser._id.toString();
           user.role = existingUser.role;
         }
@@ -244,11 +279,11 @@ export const authOptions: NextAuthOptions = {
         return true;
       } catch (error) {
         console.error("[auth] Failed to sync OAuth user with the database.", {
-          email: redactEmail(email),
+          email: redactEmail(authEmail),
           provider,
           ...mapErrorToLogMetadata(error),
         });
-        return "/login?error=AccountSyncFailed";
+        throw new Error("AUTH_DATABASE_ERROR");
       }
     },
     async jwt({ token, user }) {

@@ -67,6 +67,14 @@ export default function BarberDashboard() {
               View Details
             </button>
           </div>
+          <div className="py-3">
+            <a
+              href="/dashboard/barber/services/add"
+              className="block w-full h-10 rounded-xl bg-[#f2800d] text-white text-sm font-bold text-center leading-10"
+            >
+              Add Service
+            </a>
+          </div>
 
           <BarberRating rating={4.8} totalReviews={234} />
         </div>

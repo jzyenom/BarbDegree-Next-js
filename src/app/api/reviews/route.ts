@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
   const bookingFilter: Record<string, unknown> = {
     clientId: user.id,
     barberId,
-    status: { $in: ["confirmed", "completed"] },
+    status: "confirmed",
     paymentStatus: "paid",
     _id: bookingId,
   };

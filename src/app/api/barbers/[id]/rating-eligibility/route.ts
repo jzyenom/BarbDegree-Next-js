@@ -44,7 +44,7 @@ export async function GET(
     barberId: barber._id,
     clientId: user.id,
     paymentStatus: "paid",
-    status: { $in: ["confirmed", "completed"] },
+    status: "confirmed",
   })
     .sort({ dateTime: -1 })
     .select("_id service services dateTime status estimatedPrice amountPaid")

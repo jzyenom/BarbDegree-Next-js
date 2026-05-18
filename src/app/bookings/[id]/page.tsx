@@ -247,7 +247,7 @@ export default function BookingDetailsPage() {
   const canClientRate =
     isClient &&
     booking?.paymentStatus === "paid" &&
-    (booking?.status === "confirmed" || booking?.status === "completed") &&
+    booking?.status === "confirmed" &&
     Boolean(barberProfileId);
 
   const servicesLabel = useMemo(() => {

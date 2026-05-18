@@ -5,7 +5,7 @@
  */
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 import HeaderBack from "@/components/ui/HeaderBack";
 import StatCard from "@/components/ui/StatCard";
@@ -17,16 +17,6 @@ import BottomNav from "@/components/ui/BottomNav";
 import { formatNaira } from "@/lib/format";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchBookings } from "@/features/bookings/bookingsSlice";
-
-type Booking = {
-  _id: string;
-  service: string;
-  dateTime: string;
-  amountPaid?: number;
-  estimatedPrice?: number;
-  barberId?: { name?: string } | string;
-  paymentStatus?: string;
-};
 
 /**
  * AUTO-FUNCTION-COMMENT: TransactionsPage
@@ -145,13 +135,13 @@ export default function TransactionsPage() {
    * Line-by-line:
    * 1. Executes `dispatch(fetchBookings({ service: serviceFilter, from, to }));`.
    */
-  async function fetchData() {
+  const fetchData = useCallback(async () => {
     dispatch(fetchBookings({ service: serviceFilter, from, to }));
-  }
+  }, [dispatch, serviceFilter, from, to]);
 
   useEffect(() => {
     if (session?.user) fetchData();
-  }, [session]);
+  }, [fetchData, session?.user]);
 
   const totalSpending = useMemo(() => {
     if (!bookings) return 0;

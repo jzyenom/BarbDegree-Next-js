@@ -13,9 +13,12 @@ interface BarberCardProps {
   location?: string;
   rating?: number | null;
   reviews?: number | null;
+  badges?: string[];
   price?: number | null;
   image: string;
   href?: string;
+  profileHref?: string;
+  bookable?: boolean;
 }
 
 /**
@@ -92,9 +95,12 @@ export default function BarberCard({
   location,
   rating,
   reviews,
+  badges = [],
   price,
   image,
   href,
+  profileHref,
+  bookable = true,
 }: BarberCardProps) {
   const hasRating = typeof rating === "number" && typeof reviews === "number";
   const hasPrice = typeof price === "number" && !Number.isNaN(price);
@@ -141,27 +147,58 @@ export default function BarberCard({
           </p>
         )}
 
+        {badges.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {badges.slice(0, 2).map((badge) => (
+              <span
+                key={badge}
+                className="rounded-md bg-orange-50 px-2 py-1 text-[11px] font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-300"
+              >
+                {badge}
+              </span>
+            ))}
+          </div>
+        )}
+
         {/* Price */}
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
           {hasPrice ? `From ${price}` : "Pricing unavailable"}
         </p>
 
         {/* ✅ The "Book Now" button */}
-        {href ? (
-          <Link
-            href={href}
-            className="mt-auto h-10 w-full rounded-lg bg-orange-500 text-white text-sm font-bold hover:bg-orange-600 transition-all flex items-center justify-center"
-          >
-            Book Now
-          </Link>
-        ) : (
-          <button
-            className="mt-auto h-10 w-full rounded-lg bg-orange-500 text-white text-sm font-bold hover:bg-orange-600 transition-all"
-            type="button"
-          >
-            Book Now
-          </button>
+        {!bookable && (
+          <p className="text-xs font-semibold text-red-600">
+            This barber is currently unavailable for booking.
+          </p>
         )}
+
+        <div className="mt-auto grid grid-cols-1 gap-2">
+          {profileHref && (
+            <Link
+              href={profileHref}
+              className="h-10 w-full rounded-lg border border-orange-500 text-orange-600 text-sm font-bold hover:bg-orange-50 transition-all flex items-center justify-center"
+            >
+              View Profile
+            </Link>
+          )}
+
+          {href && bookable ? (
+            <Link
+              href={href}
+              className="h-10 w-full rounded-lg bg-orange-500 text-white text-sm font-bold hover:bg-orange-600 transition-all flex items-center justify-center"
+            >
+              Book Now
+            </Link>
+          ) : (
+            <button
+              className="h-10 w-full rounded-lg bg-zinc-300 text-zinc-600 text-sm font-bold transition-all disabled:cursor-not-allowed"
+              type="button"
+              disabled
+            >
+              Unavailable
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

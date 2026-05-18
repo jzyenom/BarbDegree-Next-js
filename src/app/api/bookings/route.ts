@@ -13,6 +13,7 @@ import { requireAuth } from "@/lib/authGuard";
 import { ensureDefaultServicesForBarber } from "@/lib/defaultServices";
 import { notifyUser } from "@/lib/notify";
 import { isAdminRole } from "@/lib/roles";
+import { hasActiveSubscription } from "@/lib/subscription-helpers";
 
 type BookingFilter = Record<string, unknown>;
 
@@ -511,13 +512,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid barber id" }, { status: 400 });
   }
 
-  const barber = await Barber.findById(barberId).select("_id userId isSubscribed");
+  const barber = await Barber.findById(barberId).select(
+    "_id userId subscriptionActive adminSubscriptionOverride adminForcedSubscriptionStatus"
+  );
   if (!barber) {
     return NextResponse.json({ error: "Barber not found" }, { status: 404 });
   }
-  if (!barber.isSubscribed) {
+  if (!hasActiveSubscription(barber)) {
     return NextResponse.json(
-      { error: "Barber is not subscribed" },
+      { error: "This barber is currently unavailable for booking." },
       { status: 403 }
     );
   }

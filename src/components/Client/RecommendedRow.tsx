@@ -5,6 +5,7 @@
  */
 "use client";
 
+import Image from "next/image";
 import { Star } from "lucide-react";
 
 type RecommendedRowProps = {
@@ -56,11 +57,13 @@ export default function RecommendedRow({
         </div>
       </div>
       <div className="h-16 w-24 overflow-hidden rounded-2xl bg-[#f5f2f0]">
-        <img
+        <Image
           src={imageUrl}
           alt={title}
           className="h-full w-full object-cover"
-          loading="lazy"
+          width={96}
+          height={64}
+          unoptimized
         />
       </div>
     </div>

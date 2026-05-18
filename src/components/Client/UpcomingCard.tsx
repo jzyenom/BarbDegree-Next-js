@@ -5,6 +5,8 @@
  */
 "use client";
 
+import Image from "next/image";
+
 type UpcomingCardProps = {
   label: string;
   title: string;
@@ -48,11 +50,13 @@ export default function UpcomingCard({
         <p className="text-sm text-[#8a7560]">{time}</p>
       </div>
       <div className="h-20 w-28 overflow-hidden rounded-2xl bg-[#f5f2f0]">
-        <img
+        <Image
           src={imageUrl}
           alt={title}
           className="h-full w-full object-cover"
-          loading="lazy"
+          width={112}
+          height={80}
+          unoptimized
         />
       </div>
     </div>

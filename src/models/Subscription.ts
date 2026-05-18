@@ -9,11 +9,17 @@ const SubscriptionSchema = new Schema(
     status: {
       type: String,
       required: true,
-      enum: ["pending", "success", "failed"],
+      enum: ["pending", "success", "failed", "cancelled"],
       default: "pending",
+      index: true,
     },
     paystackPlanCode: { type: String, required: true, trim: true },
+    subscriptionCode: { type: String, trim: true, index: true },
+    customerCode: { type: String, trim: true, index: true },
+    nextPaymentDate: { type: Date },
+    paidAt: { type: Date },
     providerResponse: { type: Schema.Types.Mixed },
+    processedWebhookEventKeys: [{ type: String, trim: true }],
   },
   { timestamps: true }
 );

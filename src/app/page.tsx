@@ -25,8 +25,10 @@ type BarberListItem = {
   location?: string;
   rating?: number | null;
   reviews?: number;
+  badges?: string[];
   charge?: string | number;
   avatar?: string;
+  bookable?: boolean;
 };
 
 /**
@@ -234,8 +236,11 @@ export default function ClientHome() {
                     price={Number.isNaN(charge) ? null : charge}
                     rating={barber.rating}
                     reviews={barber.reviews}
+                    badges={barber.badges}
                     image={barber.avatar || ""}
                     href={`/book?barberId=${barber._id}`}
+                    profileHref={`/barbers/${barber._id}`}
+                    bookable={barber.bookable}
                   />
                 );
               })}

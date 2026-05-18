@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "@/database/dbConnect";
+import { ensureDefaultSubscriptionPlans } from "@/lib/subscription-helpers";
 import Plan from "@/models/Plan";
 import { requireAuth } from "@/lib/authGuard";
 import { isAdminRole } from "@/lib/roles";
@@ -12,6 +13,7 @@ function getPaystackSecret() {
 
 export async function GET() {
   await connectToDatabase();
+  await ensureDefaultSubscriptionPlans();
   const plans = await Plan.find({ isActive: true }).sort({ amount: 1, name: 1 });
   return NextResponse.json({ plans });
 }

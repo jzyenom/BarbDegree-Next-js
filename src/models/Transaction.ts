@@ -10,6 +10,7 @@ const TransactionSchema = new Schema(
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
 
     bookingId: { type: Schema.Types.ObjectId, ref: "Booking" },
+    subscriptionId: { type: Schema.Types.ObjectId, ref: "Subscription" },
 
     amount: { type: Number, required: true },
     currency: { type: String, default: "NGN" },
@@ -22,6 +23,12 @@ const TransactionSchema = new Schema(
     },
 
     provider: { type: String, default: "paystack" },
+    type: {
+      type: String,
+      enum: ["booking_payment", "barber_subscription"],
+      default: "booking_payment",
+      index: true,
+    },
     providerResponse: { type: Schema.Types.Mixed }, // raw Paystack JSON
   },
   { timestamps: true }

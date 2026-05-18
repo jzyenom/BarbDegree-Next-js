@@ -6,6 +6,7 @@
 "use client";
 
 import axios from "axios";
+import Image from "next/image";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -26,6 +27,8 @@ type BarberListItem = {
   avatar?: string;
   serviceCount?: number;
   services?: ServiceItem[];
+  bookable?: boolean;
+  subscriptionActive?: boolean;
 };
 
 /**
@@ -434,6 +437,7 @@ function ClientBookingFormContent() {
     () => barbers.find((barber) => barber._id === barberId) ?? null,
     [barberId, barbers]
   );
+  const selectedBarberUnavailable = Boolean(selectedBarber && !selectedBarber.bookable);
 
   const selectedServices = useMemo(
     () =>
@@ -572,6 +576,11 @@ function ClientBookingFormContent() {
       return;
     }
 
+    if (selectedBarberUnavailable) {
+      alert("This barber is currently unavailable for booking.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -682,36 +691,50 @@ function ClientBookingFormContent() {
               )}
 
               <div className="grid grid-cols-2 gap-3">
-                {barbers.map((barber) => (
-                  <button
-                    key={barber._id}
-                    type="button"
-                    onClick={() => setBarberId(barber._id)}
-                    className={`rounded-xl border p-3 text-left ${
-                      barberId === barber._id
-                        ? "border-[#f2800d] bg-[#fff4ea]"
-                        : "border-[#eee]"
-                    }`}
-                  >
-                    <div className="h-20 w-full overflow-hidden rounded-lg bg-[#f5f2f0]">
-                      <img
-                        src={barber.avatar || "/avatar.svg"}
-                        alt={barber.name || "Barber"}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                    <p className="pt-2 text-sm font-semibold text-[#181411]">
-                      {barber.name || "Barber"}
-                    </p>
-                    <p className="text-xs text-[#8a7560]">
-                      {barber.address ||
-                        [barber.state, barber.country].filter(Boolean).join(", ")}
-                    </p>
-                    <p className="pt-1 text-xs text-[#8a7560]">
-                      {barber.serviceCount ?? barber.services?.length ?? 0} services
-                    </p>
-                  </button>
-                ))}
+                {barbers.map((barber) => {
+                  const unavailable = !barber.bookable;
+                  return (
+                    <button
+                      key={barber._id}
+                      type="button"
+                      onClick={() => {
+                        setBarberId(barber._id);
+                        if (unavailable) setStep(1);
+                      }}
+                      className={`rounded-xl border p-3 text-left ${
+                        barberId === barber._id
+                          ? "border-[#f2800d] bg-[#fff4ea]"
+                          : "border-[#eee]"
+                      } ${unavailable ? "opacity-65" : ""}`}
+                    >
+                      <div className="h-20 w-full overflow-hidden rounded-lg bg-[#f5f2f0]">
+                        <Image
+                          src={barber.avatar || "/avatar.svg"}
+                          alt={barber.name || "Barber"}
+                          className="h-full w-full object-cover"
+                          width={220}
+                          height={80}
+                          unoptimized
+                        />
+                      </div>
+                      <p className="pt-2 text-sm font-semibold text-[#181411]">
+                        {barber.name || "Barber"}
+                      </p>
+                      <p className="text-xs text-[#8a7560]">
+                        {barber.address ||
+                          [barber.state, barber.country].filter(Boolean).join(", ")}
+                      </p>
+                      <p className="pt-1 text-xs text-[#8a7560]">
+                        {barber.serviceCount ?? barber.services?.length ?? 0} services
+                      </p>
+                      {unavailable && (
+                        <p className="pt-2 text-xs font-semibold text-red-600">
+                          This barber is currently unavailable for booking.
+                        </p>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -876,9 +899,9 @@ function ClientBookingFormContent() {
               Previous
             </button>
             {step < 3 ? (
-              <button
+            <button
                 type="button"
-                disabled={!canGoNext}
+                disabled={!canGoNext || selectedBarberUnavailable}
                 onClick={() => setStep((previous) => Math.min(3, previous + 1))}
                 className="flex-1 h-12 rounded-lg bg-[#f2800d] text-[#181411] font-bold disabled:opacity-60 disabled:cursor-not-allowed"
               >
@@ -887,7 +910,7 @@ function ClientBookingFormContent() {
             ) : (
               <button
                 type="submit"
-                disabled={loading || selectedServiceIds.length === 0}
+                disabled={loading || selectedServiceIds.length === 0 || selectedBarberUnavailable}
                 className="flex-1 h-12 rounded-lg bg-[#f2800d] text-[#181411] font-bold disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {loading ? "Processing..." : "Place Order"}

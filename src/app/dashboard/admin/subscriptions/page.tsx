@@ -86,21 +86,29 @@ export default function AdminSubscriptionsPage() {
                 <div className="text-sm text-gray-500">
                   {barber.userId?.email || "No email"}
                 </div>
+                <div className="text-xs text-gray-500">
+                  Status: {barber.subscriptionStatus || "inactive"}
+                  {barber.adminSubscriptionOverride ? " (admin override)" : ""}
+                </div>
               </div>
               <button
                 className={`px-3 py-1 rounded ${
-                  barber.isSubscribed ? "bg-green-600 text-white" : "border"
+                  barber.adminSubscriptionOverride && barber.adminForcedSubscriptionStatus
+                    ? "bg-green-600 text-white"
+                    : "border"
                 }`}
                 onClick={() =>
                   dispatch(
                     updateAdminBarberSubscription({
                       barberId: barber._id,
-                      isSubscribed: !barber.isSubscribed,
+                      isSubscribed: !barber.adminForcedSubscriptionStatus,
                     })
                   )
                 }
               >
-                {barber.isSubscribed ? "Subscribed" : "Not subscribed"}
+                {barber.adminSubscriptionOverride && barber.adminForcedSubscriptionStatus
+                  ? "Override enabled"
+                  : "Override disabled"}
               </button>
             </div>
           ))}

@@ -9,14 +9,17 @@ import { requireAuth } from "@/lib/authGuard";
 const MAX_COMMENT_LENGTH = 1000;
 
 function normalizeComment(value: unknown) {
+  if (value == null) {
+    return { ok: true as const, value: "" };
+  }
+
   if (typeof value !== "string") {
-    return { ok: false as const, error: "Comment is required" };
+    return { ok: false as const, error: "Review must be a string" };
   }
 
   const comment = value.trim();
-  if (!comment) return { ok: false as const, error: "Comment is required" };
   if (comment.length > MAX_COMMENT_LENGTH) {
-    return { ok: false as const, error: "Comment is too long" };
+    return { ok: false as const, error: "Review is too long" };
   }
 
   return { ok: true as const, value: comment };
@@ -82,11 +85,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid booking id" }, { status: 400 });
   }
 
-  const comment = normalizeComment(body.comment);
+  const comment = normalizeComment(body.review ?? body.comment);
   if (!comment.ok) {
     return NextResponse.json({ error: comment.error }, { status: 400 });
   }
-  const rate = normalizeRate(body.rate);
+  const rate = normalizeRate(body.ratingValue ?? body.rate);
   if (!rate.ok) {
     return NextResponse.json({ error: rate.error }, { status: 400 });
   }
@@ -99,32 +102,41 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "You cannot review your own barber profile" }, { status: 400 });
   }
 
+  if (!bookingId) {
+    return NextResponse.json({ error: "bookingId is required" }, { status: 400 });
+  }
+
   const bookingFilter: Record<string, unknown> = {
     clientId: user.id,
     barberId,
     status: { $in: ["confirmed", "completed"] },
+    paymentStatus: "paid",
+    _id: bookingId,
   };
-  if (bookingId) bookingFilter._id = bookingId;
-  const booking = await Booking.findOne(bookingFilter).select("_id");
+  const booking = await Booking.findOne(bookingFilter).select("_id status");
   if (!booking) {
     return NextResponse.json(
-      { error: "A confirmed or completed booking is required before reviewing this barber" },
+      { error: "A paid and accepted booking is required before reviewing this barber" },
       { status: 403 }
     );
   }
 
   try {
-    const review = await Review.findOneAndUpdate(
-      { userId: user.id, barberId },
+    const existingReview = await Review.findOne({ bookingId: booking._id }).select("_id");
+    if (existingReview) {
+      return NextResponse.json({ error: "This booking has already been reviewed" }, { status: 409 });
+    }
+
+    const review = await Review.create(
       {
         userId: user.id,
         barberId,
         bookingId: booking._id,
         comment: comment.value,
         rate: rate.value,
-      },
-      { new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true }
+      }
     );
+    await Booking.findByIdAndUpdate(booking._id, { status: "completed" });
 
     return NextResponse.json({ review }, { status: 201 });
   } catch (error) {

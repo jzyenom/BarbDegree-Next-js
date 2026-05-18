@@ -8,6 +8,10 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 export type AdminBarber = {
   _id: string;
   isSubscribed: boolean;
+  subscriptionActive?: boolean;
+  subscriptionStatus?: "inactive" | "active" | "cancelled";
+  adminSubscriptionOverride?: boolean;
+  adminForcedSubscriptionStatus?: boolean;
   userId?: { _id?: string; email?: string; name?: string };
 };
 
@@ -35,12 +39,17 @@ export const fetchAdminBarbers = createAsyncThunk(
 export const updateAdminBarberSubscription = createAsyncThunk(
   "adminBarbers/updateSubscription",
   async ({ barberId, isSubscribed }: { barberId: string; isSubscribed: boolean }) => {
-    const res = await fetch("/api/admin/barbers/subscription", {
+    const res = await fetch("/api/admin/subscriptions/toggle-status", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ barberId, isSubscribed }),
+      body: JSON.stringify({
+        barberId,
+        enabled: true,
+        forcedStatus: isSubscribed,
+      }),
     });
     const json = await res.json();
+    if (!res.ok) throw new Error(json.error || "Failed to update subscription");
     return json.barber as AdminBarber;
   }
 );

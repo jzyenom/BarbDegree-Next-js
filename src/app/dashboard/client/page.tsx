@@ -344,7 +344,7 @@ export default function ClientDashboardPage() {
         items={[
           { name: "Home", icon: Home, href: "/dashboard/client" },
           { name: "Book", icon: Calendar, href: "/book" },
-          { name: "Profile", icon: User, href: "/profile" },
+          { name: "Profile", icon: User, href: "/dashboard/client/profile" },
         ]}
       />
     </div>

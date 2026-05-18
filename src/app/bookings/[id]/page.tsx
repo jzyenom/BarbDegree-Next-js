@@ -21,7 +21,7 @@ type BookingDetail = {
   status?: string;
   paymentStatus?: string;
   clientId?: { name?: string; email?: string };
-  barberId?: { userId?: { name?: string; email?: string } };
+  barberId?: { _id?: string; userId?: { name?: string; email?: string } };
 };
 
 /**
@@ -243,6 +243,12 @@ export default function BookingDetailsPage() {
 
   const isBarber = session?.user?.role === "barber";
   const isClient = session?.user?.role === "client";
+  const barberProfileId = booking?.barberId?._id;
+  const canClientRate =
+    isClient &&
+    booking?.paymentStatus === "paid" &&
+    (booking?.status === "confirmed" || booking?.status === "completed") &&
+    Boolean(barberProfileId);
 
   const servicesLabel = useMemo(() => {
     if (booking?.services?.length) {
@@ -363,14 +369,9 @@ export default function BookingDetailsPage() {
                   </button>
                 </div>
               </div>
-
-              <button
-                className="w-full h-11 rounded-lg border border-green-600 text-green-700 font-bold"
-                onClick={() => updateBooking({ status: "completed" })}
-                disabled={actionLoading}
-              >
-                End Booking
-              </button>
+              <p className="rounded-lg bg-zinc-50 p-3 text-sm text-zinc-600">
+                The client confirms completion by rating the paid service.
+              </p>
             </div>
           )}
 
@@ -382,6 +383,14 @@ export default function BookingDetailsPage() {
                   onClick={() => router.push(`/checkout/${id}`)}
                 >
                   Pay Now
+                </button>
+              )}
+              {canClientRate && (
+                <button
+                  className="w-full h-12 rounded-lg bg-[#f2800d] text-white font-bold"
+                  onClick={() => router.push(`/barbers/${barberProfileId}`)}
+                >
+                  Rate Barber and Confirm Completion
                 </button>
               )}
               <button

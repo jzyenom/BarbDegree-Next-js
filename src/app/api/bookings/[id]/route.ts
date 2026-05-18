@@ -385,6 +385,12 @@ export async function PUT(
     if (typeof body.status !== "string" || !STATUS_OPTIONS.has(body.status)) {
       return NextResponse.json({ error: "Invalid status" }, { status: 400 });
     }
+    if (body.status === "completed") {
+      return NextResponse.json(
+        { error: "Bookings are completed when the client rates the paid service" },
+        { status: 403 }
+      );
+    }
 
     nextStatus = body.status;
     booking.status = nextStatus as "pending" | "confirmed" | "completed" | "declined";

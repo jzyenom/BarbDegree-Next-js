@@ -9,6 +9,7 @@ import BarberHeader from "@/components/Barber/BarberHeader";
 import BarberInfoCard from "@/components/Barber/BarberInfoCard";
 import BarberRating from "@/components/Barber/BarberRating";
 import BarberGallery from "@/components/Barber/BarberGallery";
+import SubscriptionPlans from "@/components/Barber/SubscriptionPlans";
 import BottomNav, { barberNavItems } from "@/components/BottomNav";
 
 /**
@@ -47,7 +48,7 @@ import BottomNav, { barberNavItems } from "@/components/BottomNav";
  */
 export default function BarberDashboard() {
   return (
-    <div className="flex flex-col min-h-screen bg-white text-[#181411] justify-between font-inter">
+    <div className="flex flex-col min-h-screen bg-white text-[#181411] justify-between pb-28 font-inter">
       <div>
         <BarberHeader title="Dashboard" />
 
@@ -83,6 +84,8 @@ export default function BarberDashboard() {
           <h2 className="text-[22px] font-bold mb-3">Gallery</h2>
           <BarberGallery />
         </div>
+
+        <SubscriptionPlans />
       </div>
 
       <BottomNav items={barberNavItems} activeItem="Home" />

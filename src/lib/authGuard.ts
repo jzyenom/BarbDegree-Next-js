@@ -30,6 +30,8 @@ const emptyUser: AuthenticatedUser = {
  * 8. Executes `};`.
  */
 export async function requireAuth(_req?: Request | NextRequest) {
+  void _req;
+
   if (!authOptions.secret) {
     if (process.env.NODE_ENV === "production") {
       console.error("[authGuard] Auth secret is not configured");

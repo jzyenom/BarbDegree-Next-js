@@ -7,8 +7,14 @@ import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 import connectToDatabase from "@/database/dbConnect";
 import Barber from "@/models/Barber";
+import Booking from "@/models/Booking";
 import Review from "@/models/Review";
 import { ensureDefaultServicesForBarbers } from "@/lib/defaultServices";
+import { hasActiveSubscription } from "@/lib/subscription-helpers";
+import {
+  BarberReputationEngine,
+  type BarberReputationBadge,
+} from "@/lib/reputation/BarberReputationEngine";
 import "@/models/Shop";
 import "@/models/Service";
 
@@ -25,6 +31,8 @@ type BarberResponse = {
   location?: string;
   rating: number | null;
   reviews: number;
+  reputationScore: number;
+  badges: BarberReputationBadge[];
   serviceCount: number;
   services: {
     _id: string;
@@ -32,6 +40,8 @@ type BarberResponse = {
     price: number;
     durationMinutes?: number;
   }[];
+  subscriptionActive: boolean;
+  bookable: boolean;
 };
 
 type BarberDocWithServices = {
@@ -42,6 +52,9 @@ type BarberDocWithServices = {
   country?: string;
   charge?: string;
   avatar?: string;
+  subscriptionActive?: boolean;
+  adminSubscriptionOverride?: boolean;
+  adminForcedSubscriptionStatus?: boolean;
   shop?: {
     name?: string;
     address?: string;
@@ -121,18 +134,74 @@ export async function GET() {
       })) as BarberDocWithServices[];
 
     const barberIds = barbers.map((barber) => barber._id);
+    const recentStart = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
     const ratingRows = await Review.aggregate<{
       _id: mongoose.Types.ObjectId;
       rating: number;
       reviews: number;
+      ratingStandardDeviation: number | null;
+      recentAverageRating: number | null;
+      recentReviewCount: number;
     }>([
       { $match: { barberId: { $in: barberIds } } },
-      { $group: { _id: "$barberId", rating: { $avg: "$rate" }, reviews: { $sum: 1 } } },
+      {
+        $group: {
+          _id: "$barberId",
+          rating: { $avg: "$rate" },
+          reviews: { $sum: 1 },
+          ratingStandardDeviation: { $stdDevPop: "$rate" },
+          recentAverageRating: {
+            $avg: {
+              $cond: [{ $gte: ["$createdAt", recentStart] }, "$rate", null],
+            },
+          },
+          recentReviewCount: {
+            $sum: {
+              $cond: [{ $gte: ["$createdAt", recentStart] }, 1, 0],
+            },
+          },
+        },
+      },
+    ]);
+    const bookingRows = await Booking.aggregate<{
+      _id: mongoose.Types.ObjectId;
+      completedJobs: number;
+      cancelledJobs: number;
+    }>([
+      {
+        $match: {
+          barberId: { $in: barberIds },
+          status: { $in: ["completed", "declined"] },
+        },
+      },
+      {
+        $group: {
+          _id: "$barberId",
+          completedJobs: {
+            $sum: { $cond: [{ $eq: ["$status", "completed"] }, 1, 0] },
+          },
+          cancelledJobs: {
+            $sum: { $cond: [{ $eq: ["$status", "declined"] }, 1, 0] },
+          },
+        },
+      },
     ]);
     const ratings = new Map(
       ratingRows.map((row) => [
         row._id.toString(),
-        { rating: Number(row.rating.toFixed(1)), reviews: row.reviews },
+        {
+          rating: Number(row.rating.toFixed(1)),
+          reviews: row.reviews,
+          ratingStandardDeviation: row.ratingStandardDeviation,
+          recentAverageRating: row.recentAverageRating,
+          recentReviewCount: row.recentReviewCount,
+        },
+      ])
+    );
+    const bookingStats = new Map(
+      bookingRows.map((row) => [
+        row._id.toString(),
+        { completedJobs: row.completedJobs, cancelledJobs: row.cancelledJobs },
       ])
     );
 
@@ -143,6 +212,16 @@ export async function GET() {
       const services = barber.toObject({ virtuals: true }).services ?? [];
       const lowestPrice = services[0]?.price;
       const rating = ratings.get(barber._id.toString());
+      const jobs = bookingStats.get(barber._id.toString());
+      const reputation = BarberReputationEngine.calculate({
+        averageRating: rating?.rating ?? 0,
+        reviewCount: rating?.reviews ?? 0,
+        ratingStandardDeviation: rating?.ratingStandardDeviation,
+        recentAverageRating: rating?.recentAverageRating,
+        recentReviewCount: rating?.recentReviewCount ?? 0,
+        completedJobs: jobs?.completedJobs ?? 0,
+        cancelledJobs: jobs?.cancelledJobs ?? 0,
+      });
       const shopLocation = [barber.shop?.city, barber.shop?.state, barber.shop?.country]
         .filter(Boolean)
         .join(", ");
@@ -163,6 +242,10 @@ export async function GET() {
         location: shopLocation || fallbackLocation,
         rating: rating?.rating ?? null,
         reviews: rating?.reviews ?? 0,
+        reputationScore: reputation.reputationScore,
+        badges: reputation.badges,
+        subscriptionActive: Boolean(barber.subscriptionActive),
+        bookable: hasActiveSubscription(barber),
         serviceCount: services.length,
         services: services.map((service) => ({
           _id: service._id.toString(),
@@ -171,6 +254,11 @@ export async function GET() {
           durationMinutes: service.durationMinutes,
         })),
       };
+    }).sort((a, b) => {
+      if (b.reputationScore !== a.reputationScore) {
+        return b.reputationScore - a.reputationScore;
+      }
+      return b.reviews - a.reviews;
     });
 
     return NextResponse.json({ barbers: results });

@@ -52,14 +52,14 @@ type BottomNavProps = {
 export const clientNavItems: NavItem[] = [
   { name: "Home", icon: Home, active: true, href: "/" },
   { name: "Book", icon: Calendar, href: "/book" },
-  { name: "Profile", icon: User, href: "/profile" },
+  { name: "Profile", icon: User, href: "/dashboard/client/profile" },
 ];
 
 export const barberNavItems: NavItem[] = [
   { name: "Home", icon: Home, href: "/dashboard/barber" },
   { name: "Bookings", icon: Calendar, href: "/dashboard/barber/bookings" },
   { name: "Services", icon: List, href: "/dashboard/barber/services" },
-  { name: "Profile", icon: User, href: "/dashboard/barber" },
+  { name: "Profile", icon: User, href: "/dashboard/barber/profile" },
 ];
 
 const defaultItems: NavItem[] = clientNavItems;

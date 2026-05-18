@@ -5,6 +5,8 @@
  */
 "use client";
 
+import Image from "next/image";
+
 type RebookCardProps = {
   title: string;
   subtitle: string;
@@ -40,11 +42,13 @@ export default function RebookCard({
   return (
     <div className="min-w-[170px] max-w-[170px]">
       <div className="h-36 w-full overflow-hidden rounded-2xl bg-[#f5f2f0]">
-        <img
+        <Image
           src={imageUrl}
           alt={title}
           className="h-full w-full object-cover"
-          loading="lazy"
+          width={170}
+          height={144}
+          unoptimized
         />
       </div>
       <div className="pt-3">

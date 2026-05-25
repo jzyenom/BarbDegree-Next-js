@@ -7,6 +7,7 @@ import Client from "@/models/Client";
 import User from "@/models/User";
 
 type SelectedRole = "barber" | "client";
+type DashboardRole = "client" | "barber" | "admin" | "superadmin";
 
 type AuthRedirectPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -41,6 +42,13 @@ async function persistSelectedRole(email: string, role: SelectedRole) {
   return role;
 }
 
+async function getCurrentUserRole(email: string) {
+  await connectToDatabase();
+
+  const user = await User.findOne({ email }).select("_id role");
+  return (user?.role as DashboardRole | undefined) ?? null;
+}
+
 export default async function AuthRedirectPage({ searchParams }: AuthRedirectPageProps) {
   const session = await getServerSession(authOptions);
 
@@ -48,8 +56,11 @@ export default async function AuthRedirectPage({ searchParams }: AuthRedirectPag
     redirect("/login");
   }
 
-  if (session.user.role) {
-    redirect(`/dashboard/${session.user.role}`);
+  const email = session.user.email.trim().toLowerCase();
+  const currentRole = await getCurrentUserRole(email);
+
+  if (currentRole) {
+    redirect(`/dashboard/${currentRole}`);
   }
 
   const params = await searchParams;
@@ -59,7 +70,6 @@ export default async function AuthRedirectPage({ searchParams }: AuthRedirectPag
     redirect("/register");
   }
 
-  const email = session.user.email.trim().toLowerCase();
   const persistedRole = await persistSelectedRole(email, selectedRole);
 
   if (persistedRole === "client" || persistedRole === "barber") {

@@ -8,6 +8,7 @@ import { getProviders, signIn } from "next-auth/react";
 import { Suspense, useEffect, useMemo, useState } from "react";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const DEFAULT_CALLBACK_URL = "/auth/redirect";
 
 function mapAuthError(errorCode: string | null, isSignupMode: boolean): string {
   switch (errorCode) {
@@ -40,6 +41,7 @@ function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isSignupMode = searchParams?.get("mode") === "signup";
+  const requestedCallbackUrl = searchParams?.get("callbackUrl");
   const selectedRole = useMemo(() => {
     const requestedRole = searchParams?.get("role");
 
@@ -47,9 +49,17 @@ function LoginPageContent() {
       ? requestedRole
       : null;
   }, [searchParams]);
-  const callbackUrl = selectedRole
-    ? `/auth/redirect?role=${selectedRole}`
-    : "/auth/redirect";
+  const callbackUrl = useMemo(() => {
+    if (selectedRole) {
+      return `/auth/redirect?role=${selectedRole}`;
+    }
+
+    if (requestedCallbackUrl?.startsWith("/") && !requestedCallbackUrl.startsWith("//")) {
+      return requestedCallbackUrl;
+    }
+
+    return DEFAULT_CALLBACK_URL;
+  }, [requestedCallbackUrl, selectedRole]);
   const queryErrorMessage = useMemo(
     () => mapAuthError(searchParams?.get("error") ?? null, isSignupMode),
     [isSignupMode, searchParams]

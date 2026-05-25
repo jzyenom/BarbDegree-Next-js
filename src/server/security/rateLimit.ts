@@ -1,4 +1,3 @@
-import { createClient, type RedisClientType } from "redis";
 import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "@/database/dbConnect";
 
@@ -16,11 +15,6 @@ type MemoryBucket = {
 const memoryBuckets = new Map<string, MemoryBucket>();
 let mongoIndexPromise: Promise<void> | null = null;
 
-const globalForRedis = globalThis as typeof globalThis & {
-  rateLimitRedis?: RedisClientType;
-  rateLimitRedisPromise?: Promise<RedisClientType>;
-};
-
 function getClientIp(req: Request | NextRequest) {
   const forwardedFor = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
   return (
@@ -37,55 +31,6 @@ function getRouteKey(req: Request | NextRequest) {
   } catch {
     return "unknown";
   }
-}
-
-async function getRedisClient() {
-  const redisUrl = process.env.REDIS_URL?.trim();
-  if (!redisUrl) return null;
-
-  if (globalForRedis.rateLimitRedis?.isOpen) {
-    return globalForRedis.rateLimitRedis;
-  }
-
-  if (!globalForRedis.rateLimitRedisPromise) {
-    const client = createClient({
-      url: redisUrl,
-      socket: {
-        connectTimeout: 500,
-        reconnectStrategy: false,
-      },
-    });
-    client.on("error", (error) => {
-      console.error("[rate-limit] Redis error", error);
-    });
-    globalForRedis.rateLimitRedis = client as RedisClientType;
-    globalForRedis.rateLimitRedisPromise = client.connect()
-      .then(() => client as RedisClientType)
-      .catch((error) => {
-        globalForRedis.rateLimitRedis = undefined;
-        globalForRedis.rateLimitRedisPromise = undefined;
-        client.destroy();
-        throw error;
-      });
-  }
-
-  return globalForRedis.rateLimitRedisPromise;
-}
-
-async function hitRedis(key: string, windowMs: number) {
-  const client = await getRedisClient();
-  if (!client) return null;
-
-  const count = await client.incr(key);
-  if (count === 1) {
-    await client.pExpire(key, windowMs);
-  }
-
-  const ttlMs = await client.pTTL(key);
-  return {
-    count,
-    resetMs: ttlMs > 0 ? ttlMs : windowMs,
-  };
 }
 
 async function getMongoRateLimitCollection() {
@@ -191,10 +136,7 @@ export async function enforceRateLimit(
 
   let result: { count: number; resetMs: number };
   try {
-    result =
-      (await hitRedis(key, config.windowMs)) ??
-      (await hitMongo(key, config.windowMs)) ??
-      hitMemory(key, config.windowMs);
+    result = (await hitMongo(key, config.windowMs)) ?? hitMemory(key, config.windowMs);
   } catch (error) {
     console.error("[rate-limit] Falling back to memory limiter", error);
     result = hitMemory(key, config.windowMs);

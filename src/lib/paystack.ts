@@ -60,11 +60,7 @@ function getPaystackSecretKey() {
 }
 
 function getWebhookSecret() {
-  return (
-    process.env.PAYSTACK_WEBHOOK_SECRET?.trim() ||
-    process.env.PAYSTACK_SECRET_KEY?.trim() ||
-    ""
-  );
+  return process.env.PAYSTACK_SECRET_KEY?.trim() || "";
 }
 
 async function paystackFetch<T>(path: string, init?: RequestInit) {

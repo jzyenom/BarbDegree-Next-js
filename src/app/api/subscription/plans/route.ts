@@ -8,7 +8,7 @@ import { isAdminRole } from "@/lib/roles";
 const INTERVALS = new Set(["daily", "weekly", "monthly", "quarterly", "biannually", "annually"]);
 
 function getPaystackSecret() {
-  return process.env.PAYSTACK_SECRET_KEY || process.env.PAYSTACK_SECRET || "";
+  return process.env.PAYSTACK_SECRET_KEY || "";
 }
 
 export async function GET() {

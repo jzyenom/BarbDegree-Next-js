@@ -5,20 +5,6 @@ function readEnv(name: string): string | undefined {
   return value ? value : undefined;
 }
 
-function readFirstEnv(...names: string[]): string | undefined {
-  for (const name of names) {
-    const value = readEnv(name);
-    if (value) return value;
-  }
-
-  return undefined;
-}
-
-function getVercelUrl(): string | undefined {
-  const vercelUrl = readEnv("VERCEL_URL");
-  return vercelUrl ? `https://${vercelUrl.replace(/^https?:\/\//, "")}` : undefined;
-}
-
 function parseAbsoluteUrl(name: string, value: string): string {
   let parsed: URL;
 
@@ -32,13 +18,8 @@ function parseAbsoluteUrl(name: string, value: string): string {
     parsed.hostname === "localhost" ||
     parsed.hostname === "127.0.0.1" ||
     parsed.hostname === "[::1]";
-  const isHostedDeployment = Boolean(readEnv("VERCEL_URL") || readEnv("VERCEL"));
 
-  if (
-    isProduction &&
-    parsed.protocol !== "https:" &&
-    !(isLocalhost && !isHostedDeployment)
-  ) {
+  if (isProduction && parsed.protocol !== "https:" && !isLocalhost) {
     throw new Error(`[env] ${name} must use https in production. Received: "${value}".`);
   }
 
@@ -52,14 +33,9 @@ export function getAuthBaseUrl(): string | undefined {
     return parseAbsoluteUrl("NEXTAUTH_URL", explicitUrl);
   }
 
-  const vercelUrl = getVercelUrl();
-  if (vercelUrl) {
-    return vercelUrl;
-  }
-
   if (isProduction) {
     throw new Error(
-      "[env] Missing NEXTAUTH_URL/AUTH_URL in production and no VERCEL_URL fallback is available."
+      "[env] Missing NEXTAUTH_URL/AUTH_URL in production."
     );
   }
 
@@ -77,9 +53,7 @@ export function getNextAuthSecret(): string | undefined {
 }
 
 export function getMongoUri(): string {
-  const mongoUri =
-    readEnv("MONGODB_URI") ??
-    (isProduction ? readEnv("MONGODB_URI_CLOUD") : readEnv("MONGODB_URI_LOCAL"));
+  const mongoUri = readEnv("MONGODB_URI");
 
   if (mongoUri) {
     return mongoUri;
@@ -87,7 +61,7 @@ export function getMongoUri(): string {
 
   if (isProduction) {
     throw new Error(
-      "[env] Missing MongoDB connection string. Set MONGODB_URI (preferred) or MONGODB_URI_CLOUD in production."
+      "[env] Missing MongoDB connection string. Set MONGODB_URI in production."
     );
   }
 
@@ -99,16 +73,12 @@ export function getGoogleOAuthConfig(): {
   clientSecret?: string;
   enabled: boolean;
 } {
-  const clientId = readFirstEnv("GOOGLE_CLIENT_ID", "GOOGLE_ID", "AUTH_GOOGLE_ID");
-  const clientSecret = readFirstEnv(
-    "GOOGLE_CLIENT_SECRET",
-    "GOOGLE_SECRET",
-    "AUTH_GOOGLE_SECRET"
-  );
+  const clientId = readEnv("GOOGLE_CLIENT_ID");
+  const clientSecret = readEnv("GOOGLE_CLIENT_SECRET");
 
   if ((clientId && !clientSecret) || (!clientId && clientSecret)) {
     throw new Error(
-      "[env] Google OAuth client ID and secret must either both be set or both be omitted."
+      "[env] GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must either both be set or both be omitted."
     );
   }
 

@@ -140,6 +140,7 @@ export default function CheckoutPage() {
     booking.barberId?.userId?.name || booking.barberId?.userId?.email || "Barber";
   const payableAmount = booking.amountPaid || booking.estimatedPrice || 0;
   const isPaid = booking.paymentStatus === "paid";
+  const canPay = booking.status === "confirmed" && !isPaid;
 
   return (
     <div className="min-h-screen flex flex-col justify-between bg-white">
@@ -150,7 +151,7 @@ export default function CheckoutPage() {
           <h2 className="text-[22px] font-bold text-[#181411]">Review & Pay</h2>
           {/* show text */}
           <p className="text-sm text-[#8a7560] mt-1">
-            You can pay now with Paystack or pay later from your booking details.
+            Payment opens after the barber accepts the booking.
           </p>
         </div>
 
@@ -234,9 +235,15 @@ export default function CheckoutPage() {
             <button
               className="h-12 rounded-lg bg-[#f2800d] font-bold text-white disabled:bg-[#f0b67b]"
               onClick={handlePayNow}
-              disabled={paying || isPaid}
+              disabled={paying || !canPay}
             >
-              {isPaid ? "Already Paid" : paying ? "Opening Paystack..." : "Pay Now"}
+              {isPaid
+                ? "Already Paid"
+                : booking.status !== "confirmed"
+                  ? "Awaiting Acceptance"
+                  : paying
+                    ? "Opening Paystack..."
+                    : "Pay Now"}
             </button>
           </div>
         </div>

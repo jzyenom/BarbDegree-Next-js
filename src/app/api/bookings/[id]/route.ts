@@ -145,6 +145,12 @@ export async function PUT(
         { status: 403 }
       );
     }
+    if (body.status === "declined" && booking.paymentStatus === "paid") {
+      return NextResponse.json(
+        { error: "Paid bookings cannot be declined" },
+        { status: 409 }
+      );
+    }
 
     nextStatus = body.status;
     booking.status = nextStatus as "pending" | "confirmed" | "completed" | "declined";

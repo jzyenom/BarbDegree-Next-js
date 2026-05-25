@@ -59,6 +59,12 @@ export async function POST(req: NextRequest) {
   if (booking.paymentStatus === "paid") {
     return NextResponse.json({ error: "Booking is already paid" }, { status: 400 });
   }
+  if (booking.status !== "confirmed") {
+    return NextResponse.json(
+      { error: "Only confirmed bookings can be paid for" },
+      { status: 400 }
+    );
+  }
 
   const bookingClientId = booking.clientId?.toString?.() ?? "";
   if (bookingClientId !== user.id && !isAdminRole(user.role)) {

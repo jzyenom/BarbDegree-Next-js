@@ -66,6 +66,15 @@ export default function BookingDetailsPage() {
     booking?.paymentStatus === "paid" &&
     booking?.status === "confirmed" &&
     Boolean(barberProfileId);
+  const canClientPay =
+    isClient &&
+    booking?.paymentStatus !== "paid" &&
+    booking?.status === "confirmed";
+  const canDecline =
+    isBarber &&
+    booking?.paymentStatus !== "paid" &&
+    booking?.status !== "declined" &&
+    booking?.status !== "completed";
 
   const servicesLabel = useMemo(() => {
     if (booking?.services?.length) {
@@ -140,7 +149,7 @@ export default function BookingDetailsPage() {
                 <button
                   className="flex-1 h-11 rounded-lg bg-red-600 text-white font-bold"
                   onClick={() => updateBooking({ status: "declined" })}
-                  disabled={actionLoading}
+                  disabled={actionLoading || !canDecline}
                 >
                   Decline
                 </button>
@@ -176,7 +185,7 @@ export default function BookingDetailsPage() {
 
           <div className="px-4 py-6">
             <div className="space-y-3">
-              {isClient && booking.paymentStatus !== "paid" && (
+              {canClientPay && (
                 <button
                   className="w-full h-12 rounded-lg bg-[#f2800d] text-white font-bold"
                   onClick={() => router.push(`/checkout/${id}`)}

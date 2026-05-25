@@ -51,7 +51,7 @@ export async function POST(req: Request) {
     await connectToDatabase();
 
     const booking = await Booking.findById(bookingId).select(
-      "_id clientId paymentReference paymentStatus"
+      "_id clientId paymentReference paymentStatus status"
     );
     if (!booking) {
       return NextResponse.json({ error: "Booking not found" }, { status: 404 });
@@ -76,6 +76,13 @@ export async function POST(req: Request) {
         bookingId,
         reference,
       });
+    }
+
+    if (booking.status !== "confirmed") {
+      return NextResponse.json(
+        { error: "Only confirmed bookings can be paid for" },
+        { status: 400 }
+      );
     }
 
     const secretKey = process.env.PAYSTACK_SECRET_KEY;
@@ -132,7 +139,6 @@ export async function POST(req: Request) {
           paymentStatus: "paid",
           amountPaid,
           paymentReference: reference,
-          status: "confirmed",
         },
         { new: true }
       );

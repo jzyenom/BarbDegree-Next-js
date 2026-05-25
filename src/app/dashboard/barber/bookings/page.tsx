@@ -70,6 +70,9 @@ export default function BarberBookingsPage() {
                 Status: {booking.status || "pending"}
               </div>
               <div className="text-sm text-gray-500">
+                Payment: {booking.paymentStatus || "pending"}
+              </div>
+              <div className="text-sm text-gray-500">
                 Client: {getDisplayName(booking.clientId, "Unknown")}
               </div>
 
@@ -92,6 +95,7 @@ export default function BarberBookingsPage() {
                 <button
                   className="px-3 py-1 border text-red-600 rounded"
                   onClick={() => handleDecline(booking._id)}
+                  disabled={booking.paymentStatus === "paid"}
                 >
                   Decline
                 </button>

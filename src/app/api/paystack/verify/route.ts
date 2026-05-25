@@ -57,6 +57,14 @@ async function verifyReference(reference: string): Promise<VerifyResult> {
   const status: "success" | "failed" =
     verifyData.status === "success" ? "success" : "failed";
 
+  const booking = await Booking.findOne({ paymentReference: reference })
+    .select("_id status")
+    .lean<{ _id: IdLike; status?: string } | null>();
+
+  if (status === "success" && booking?.status !== "confirmed") {
+    throw new Error("Only confirmed bookings can be paid for");
+  }
+
   await Transaction.findOneAndUpdate(
     { reference },
     {
@@ -73,7 +81,6 @@ async function verifyReference(reference: string): Promise<VerifyResult> {
         paymentStatus: "paid",
         amountPaid:
           typeof verifyData.amount === "number" ? verifyData.amount / 100 : 0,
-        status: "confirmed",
       },
       { new: true }
     ).lean<UpdatedBookingRef>();

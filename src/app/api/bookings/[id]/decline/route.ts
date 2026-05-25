@@ -30,6 +30,13 @@ export async function POST(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  if (booking.paymentStatus === "paid") {
+    return NextResponse.json(
+      { error: "Paid bookings cannot be declined" },
+      { status: 409 }
+    );
+  }
+
   booking.status = "declined";
   await booking.save();
 

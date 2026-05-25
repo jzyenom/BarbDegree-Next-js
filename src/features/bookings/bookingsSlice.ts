@@ -55,6 +55,9 @@ export const updateBooking = createAsyncThunk(
       body: JSON.stringify(data),
     });
     const json = await res.json();
+    if (!res.ok) {
+      throw new Error(json.error ?? "Failed to update booking");
+    }
     return json.booking as Booking;
   }
 );

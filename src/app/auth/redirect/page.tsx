@@ -5,9 +5,9 @@ import connectToDatabase from "@/database/dbConnect";
 import Barber from "@/models/Barber";
 import Client from "@/models/Client";
 import User from "@/models/User";
+import { dashboardPathForRole, getCurrentUserRoleByEmail } from "@/lib/userRole";
 
 type SelectedRole = "barber" | "client";
-type DashboardRole = "client" | "barber" | "admin" | "superadmin";
 
 type AuthRedirectPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -42,13 +42,6 @@ async function persistSelectedRole(email: string, role: SelectedRole) {
   return role;
 }
 
-async function getCurrentUserRole(email: string) {
-  await connectToDatabase();
-
-  const user = await User.findOne({ email }).select("_id role");
-  return (user?.role as DashboardRole | undefined) ?? null;
-}
-
 export default async function AuthRedirectPage({ searchParams }: AuthRedirectPageProps) {
   const session = await getServerSession(authOptions);
 
@@ -57,10 +50,10 @@ export default async function AuthRedirectPage({ searchParams }: AuthRedirectPag
   }
 
   const email = session.user.email.trim().toLowerCase();
-  const currentRole = await getCurrentUserRole(email);
+  const currentRole = await getCurrentUserRoleByEmail(email);
 
   if (currentRole) {
-    redirect(`/dashboard/${currentRole}`);
+    redirect(dashboardPathForRole(currentRole));
   }
 
   const params = await searchParams;

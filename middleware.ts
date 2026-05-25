@@ -1,17 +1,10 @@
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
+import { SESSION_COOKIE_NAME } from "@/lib/authCookies";
 
 const ADMIN_API_WINDOW_MS = 60 * 1000;
 const ADMIN_API_MAX_REQUESTS = 120;
 const adminApiBuckets = new Map<string, { count: number; expiresAt: number }>();
-
-function isAdminRole(role?: string | null) {
-  return role === "admin" || role === "superadmin";
-}
-
-function isSuperadminRole(role?: string | null) {
-  return role === "superadmin";
-}
 
 function authSecret() {
   return (
@@ -25,10 +18,6 @@ function loginRedirect(req: NextRequest) {
   const url = new URL("/login", req.url);
   url.searchParams.set("callbackUrl", req.nextUrl.pathname + req.nextUrl.search);
   return NextResponse.redirect(url);
-}
-
-function dashboardRedirect(req: NextRequest) {
-  return NextResponse.redirect(new URL("/dashboard", req.url));
 }
 
 function jsonError(message: string, status: number) {
@@ -68,11 +57,13 @@ function adminApiRateLimit(req: NextRequest) {
 }
 
 export async function middleware(req: NextRequest) {
-  const token = await getToken({ req, secret: authSecret() });
+  const token = await getToken({
+    req,
+    secret: authSecret(),
+    cookieName: SESSION_COOKIE_NAME,
+  });
   const pathname = req.nextUrl.pathname;
   const isAdminApi = pathname.startsWith("/api/admin");
-  const isSuperadminPage = pathname.startsWith("/dashboard/superadmin");
-  const role = token?.role;
 
   if (!token) {
     return isAdminApi ? jsonError("Unauthorized", 401) : loginRedirect(req);
@@ -81,18 +72,6 @@ export async function middleware(req: NextRequest) {
   if (isAdminApi) {
     const limited = adminApiRateLimit(req);
     if (limited) return limited;
-  }
-
-  if (isSuperadminPage) {
-    if (!isSuperadminRole(role)) {
-      return dashboardRedirect(req);
-    }
-
-    return NextResponse.next();
-  }
-
-  if (!isAdminRole(role)) {
-    return isAdminApi ? jsonError("Forbidden", 403) : dashboardRedirect(req);
   }
 
   return NextResponse.next();

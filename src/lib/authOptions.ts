@@ -8,6 +8,7 @@ import {
   getGoogleOAuthConfig,
   getNextAuthSecret,
 } from "@/lib/env";
+import { SESSION_COOKIE_NAME } from "@/lib/authCookies";
 import User from "@/models/User";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -206,7 +207,7 @@ export const authOptions: NextAuthOptions = {
   },
   cookies: {
     sessionToken: {
-      name: `next-auth.session-token`,
+      name: SESSION_COOKIE_NAME,
       options: {
         httpOnly: true,
         sameSite: "lax",

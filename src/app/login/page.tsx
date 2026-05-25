@@ -4,7 +4,7 @@ import AuthInput from "@/components/AuthInput";
 import AuthLayout from "@/components/layouts/AuthLayout";
 import { Circle, Lock, Mail } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getProviders, signIn } from "next-auth/react";
+import { getProviders, signIn, useSession } from "next-auth/react";
 import { Suspense, useEffect, useMemo, useState } from "react";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -40,6 +40,7 @@ function mapAuthError(errorCode: string | null, isSignupMode: boolean): string {
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { status } = useSession();
   const isSignupMode = searchParams?.get("mode") === "signup";
   const requestedCallbackUrl = searchParams?.get("callbackUrl");
   const selectedRole = useMemo(() => {
@@ -112,6 +113,12 @@ function LoginPageContent() {
     setError(queryErrorMessage);
   }, [queryErrorMessage]);
 
+  useEffect(() => {
+    if (status !== "authenticated") return;
+
+    router.replace(selectedRole ? callbackUrl : DEFAULT_CALLBACK_URL);
+  }, [callbackUrl, router, selectedRole, status]);
+
   const handleGoogleLogin = async () => {
     setError("");
 
@@ -164,6 +171,16 @@ function LoginPageContent() {
       setIsSubmitting(false);
     }
   };
+
+  if (status === "loading" || status === "authenticated") {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#fcfaf8] text-[#1c130d]">
+        <p className="text-sm font-medium">
+          {status === "authenticated" ? "Redirecting..." : "Loading sign in..."}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <AuthLayout

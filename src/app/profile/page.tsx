@@ -1,21 +1,28 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/authOptions";
+import { dashboardPathForRole, getCurrentUserRoleByEmail } from "@/lib/userRole";
 
 export default async function ProfileShortcutPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user) {
+  if (!session?.user?.email) {
     redirect("/login");
   }
 
-  if (session.user.role === "barber") {
+  const currentRole = await getCurrentUserRoleByEmail(session.user.email);
+
+  if (currentRole === "barber") {
     redirect("/dashboard/barber/profile");
   }
 
-  if (session.user.role === "admin" || session.user.role === "superadmin") {
-    redirect(`/dashboard/${session.user.role}`);
+  if (currentRole === "admin" || currentRole === "superadmin") {
+    redirect(dashboardPathForRole(currentRole));
   }
 
-  redirect("/dashboard/client/profile");
+  if (currentRole === "client") {
+    redirect("/dashboard/client/profile");
+  }
+
+  redirect("/register");
 }

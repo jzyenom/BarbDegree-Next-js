@@ -66,7 +66,7 @@ export default function BarberSignup() {
     }
 
     if (session.user.role && session.user.role !== "barber") {
-      router.replace("/register");
+      router.replace("/auth/redirect");
       return;
     }
 
@@ -75,6 +75,22 @@ export default function BarberSignup() {
     
     const verifyRegistrationState = async () => {
       try {
+        const meResponse = await fetch("/api/me", { cache: "no-store" });
+        const mePayload = (await meResponse.json().catch(() => ({}))) as {
+          user?: { role?: string | null };
+        };
+        const currentRole = mePayload.user?.role;
+
+        if (mounted && meResponse.ok && currentRole && currentRole !== "barber") {
+          router.replace("/auth/redirect");
+          return;
+        }
+
+        if (mounted && meResponse.ok && !currentRole) {
+          router.replace("/register");
+          return;
+        }
+
         const response = await fetch("/api/barber", { cache: "no-store" });
         const payload = (await response.json().catch(() => ({}))) as {
           exists?: boolean;

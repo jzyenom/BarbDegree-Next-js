@@ -24,7 +24,7 @@ export default function RoleSelectionPage() {
     if (status === "loading") return;
 
     if (session?.user?.role) {
-      router.replace(`/dashboard/${session.user.role}`);
+      router.replace("/auth/redirect");
     }
   }, [router, session, status]);
 

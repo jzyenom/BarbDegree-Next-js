@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import type { Session } from "next-auth";
 import type { NextRequest } from "next/server";
 import { authOptions } from "@/lib/authOptions";
+import { getCurrentUserRoleByEmail } from "@/lib/userRole";
 
 export type AuthenticatedUser = NonNullable<Session["user"]> & {
   id: string;
@@ -29,8 +30,10 @@ export async function requireAuth(_req?: Request | NextRequest) {
     return { user: emptyUser, unauthorized: true as const };
   }
 
+  const currentRole = await getCurrentUserRoleByEmail(session.user.email);
+
   return {
-    user: session.user as AuthenticatedUser,
+    user: { ...session.user, role: currentRole ?? session.user.role } as AuthenticatedUser,
     unauthorized: false as const,
   };
 }

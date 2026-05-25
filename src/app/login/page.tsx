@@ -209,7 +209,7 @@ function LoginPageContent() {
           ) : (
             // show text
             <p className="text-center text-sm text-[#9e6b47]">
-              Google sign-in is unavailable until the production OAuth variables are configured.
+              Google sign-in is unavailable because the server did not expose a Google auth provider.
             </p>
           )}
 

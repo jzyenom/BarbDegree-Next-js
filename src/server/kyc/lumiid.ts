@@ -7,6 +7,8 @@ export type NinVerificationResult = {
 };
 
 export async function verifyNinWithLumiId(_nin: string): Promise<NinVerificationResult> {
+  void _nin;
+
   if (process.env.NODE_ENV !== "production") {
     return {
       verified: false,

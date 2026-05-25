@@ -1,99 +1,74 @@
-"use client";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import { authOptions } from "@/lib/authOptions";
+import connectToDatabase from "@/database/dbConnect";
+import Barber from "@/models/Barber";
+import Client from "@/models/Client";
+import User from "@/models/User";
 
-import { Suspense, useEffect, useMemo, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useSession } from "next-auth/react";
+type SelectedRole = "barber" | "client";
 
-type SelectedRole = "barber" | "client" | null;
+type AuthRedirectPageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
 
+function parseSelectedRole(value: string | string[] | undefined): SelectedRole | null {
+  const role = Array.isArray(value) ? value[0] : value;
+  return role === "barber" || role === "client" ? role : null;
+}
 
-function parseSelectedRole(value: string | null): SelectedRole {
-  if (value === "barber" || value === "client") {
-    return value;
+async function persistSelectedRole(email: string, role: SelectedRole) {
+  await connectToDatabase();
+
+  const user = await User.findOne({ email }).select("_id role");
+  if (!user) return null;
+
+  const currentRole = user.role as string | undefined;
+  if (currentRole) return currentRole;
+
+  if (role === "barber") {
+    const existingClient = await Client.findOne({ userId: user._id }).select("_id");
+    if (existingClient) return null;
   }
-  return null;
+
+  if (role === "client") {
+    const existingBarber = await Barber.findOne({ userId: user._id }).select("_id");
+    if (existingBarber) return null;
+  }
+
+  user.role = role;
+  await user.save();
+  return role;
 }
 
+export default async function AuthRedirectPage({ searchParams }: AuthRedirectPageProps) {
+  const session = await getServerSession(authOptions);
 
-function AuthRedirectPageContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const { data: session, status } = useSession();
-  const hasHandledRedirect = useRef(false);
-  const selectedRole = useMemo(
-    () => parseSelectedRole(searchParams?.get("role") ?? null),
-    [searchParams]
-  );
+  if (!session?.user?.email) {
+    redirect("/login");
+  }
 
-  useEffect(() => {
-    if (status === "loading" || hasHandledRedirect.current) return;
+  if (session.user.role) {
+    redirect(`/dashboard/${session.user.role}`);
+  }
 
-    if (!session?.user) {
-      hasHandledRedirect.current = true;
-      router.replace("/login");
-      return;
-    }
+  const params = await searchParams;
+  const selectedRole = parseSelectedRole(params?.role);
 
-    const role = session.user.role;
-    if (role) {
-      hasHandledRedirect.current = true;
-      router.replace(`/dashboard/${role}`);
-      return;
-    }
+  if (!selectedRole) {
+    redirect("/register");
+  }
 
-    if (!selectedRole) {
-      hasHandledRedirect.current = true;
-      router.replace("/register");
-      return;
-    }
+  const email = session.user.email.trim().toLowerCase();
+  const persistedRole = await persistSelectedRole(email, selectedRole);
 
-    hasHandledRedirect.current = true;
+  if (persistedRole === "client" || persistedRole === "barber") {
+    redirect(`/register/${persistedRole}`);
+  }
 
-    
-    const persistRoleAndRedirect = async () => {
-      try {
-        const response = await fetch("/api/role", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ role: selectedRole }),
-        });
+  if (persistedRole === "admin" || persistedRole === "superadmin") {
+    redirect(`/dashboard/${persistedRole}`);
+  }
 
-        if (!response.ok) {
-          router.replace("/register");
-          return;
-        }
-
-        router.replace(`/register/${selectedRole}`);
-      } catch {
-        router.replace("/register");
-      }
-    };
-
-    void persistRoleAndRedirect();
-  }, [router, selectedRole, session?.user, status]);
-
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-[#fcfaf8] text-[#1c130d]">
-      {/* show text */}
-      <p className="text-sm font-medium">Redirecting...</p>
-    </div>
-  );
-}
-
-
-export default function AuthRedirectPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-screen items-center justify-center bg-[#fcfaf8] text-[#1c130d]">
-          {/* show text */}
-          <p className="text-sm font-medium">Redirecting...</p>
-        </div>
-      }
-    >
-      <AuthRedirectPageContent />
-    </Suspense>
-  );
+  redirect("/register");
 }

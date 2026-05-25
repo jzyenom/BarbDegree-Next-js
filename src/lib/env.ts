@@ -5,6 +5,15 @@ function readEnv(name: string): string | undefined {
   return value ? value : undefined;
 }
 
+function readFirstEnv(...names: string[]): string | undefined {
+  for (const name of names) {
+    const value = readEnv(name);
+    if (value) return value;
+  }
+
+  return undefined;
+}
+
 function getVercelUrl(): string | undefined {
   const vercelUrl = readEnv("VERCEL_URL");
   return vercelUrl ? `https://${vercelUrl.replace(/^https?:\/\//, "")}` : undefined;
@@ -90,12 +99,16 @@ export function getGoogleOAuthConfig(): {
   clientSecret?: string;
   enabled: boolean;
 } {
-  const clientId = readEnv("GOOGLE_CLIENT_ID");
-  const clientSecret = readEnv("GOOGLE_CLIENT_SECRET");
+  const clientId = readFirstEnv("GOOGLE_CLIENT_ID", "GOOGLE_ID", "AUTH_GOOGLE_ID");
+  const clientSecret = readFirstEnv(
+    "GOOGLE_CLIENT_SECRET",
+    "GOOGLE_SECRET",
+    "AUTH_GOOGLE_SECRET"
+  );
 
   if ((clientId && !clientSecret) || (!clientId && clientSecret)) {
     throw new Error(
-      "[env] GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must either both be set or both be omitted."
+      "[env] Google OAuth client ID and secret must either both be set or both be omitted."
     );
   }
 

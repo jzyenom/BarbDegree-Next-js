@@ -11,6 +11,7 @@ import { isAdminRole } from "@/lib/roles";
 import Barber from "@/models/Barber";
 import Plan from "@/models/Plan";
 import Subscription from "@/models/Subscription";
+import { enforceRateLimit, rateLimitProfiles } from "@/server/security/rateLimit";
 
 const REFERENCE_PATTERN = /^[A-Za-z0-9._:-]{6,160}$/;
 
@@ -25,6 +26,9 @@ function extractSubscriptionCode(data: Record<string, unknown>) {
 }
 
 async function handleVerify(req: NextRequest, reference: string) {
+  const limited = await enforceRateLimit(req, rateLimitProfiles.payment);
+  if (limited) return limited;
+
   if (!REFERENCE_PATTERN.test(reference)) {
     return NextResponse.json({ error: "Missing or invalid reference" }, { status: 400 });
   }

@@ -1,28 +1,3 @@
-/**
- * AUTO-FILE-COMMENT: src/components/HeroBanner.tsx
- * Purpose: Explains the role of this module and documents its functions.
- * Notes: Comments are documentation-only and do not change runtime behavior.
- */
-/**
- * AUTO-FUNCTION-COMMENT: HeroBanner
- * Purpose: Handles hero banner.
- * Line-by-line:
- * 1. Executes `return (`.
- * 2. Executes `<div className="px-4">`.
- * 3. Executes `<div`.
- * 4. Executes `className="bg-cover bg-center rounded-xl min-h-[200px] flex flex-col justify-end overflow-hidden"`.
- * 5. Executes `style={{`.
- * 6. Executes `backgroundImage:`.
- * 7. Executes `'linear-gradient(0deg, rgba(0, 0, 0, 0.5), transparent 40%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuAMhPxfnZFiBhXzb_xJF...`.
- * 8. Executes `}}`.
- * 9. Executes `>`.
- * 10. Executes `<p className="text-white text-[28px] font-bold leading-tight p-5">`.
- * 11. Executes `Find your trusted barber`.
- * 12. Executes `</p>`.
- * 13. Executes `</div>`.
- * 14. Executes `</div>`.
- * 15. Executes `);`.
- */
 export default function HeroBanner() {
   return (
     <div className="px-4">
@@ -33,7 +8,8 @@ export default function HeroBanner() {
             'linear-gradient(0deg, rgba(0, 0, 0, 0.5), transparent 40%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuAMhPxfnZFiBhXzb_xJF-yqOxjowaLqPcEAvxx7_Ezk42NMXR0dpeeZhUDTVfhWHYexrNPOrMZU2HoTAgecVGC1J7MuBLEQSRDTeKglBZUern9UkVq8UdZ5PjK3aLpITmjbtVXK_ap-Y0jts1jPOerMpQ1UWuOo0oGqj_R2naOR9aAVJxTiATEoG7ryAf8_xkwFMEZ675nzj0liY6TjtqqJHi4xXa_XN8zUqXlC_gcnYh9nq0kRmbhPso1K7dr4wSjqj1s4BaH7OGrh")',
         }}
       >
-        <p className="text-white text-[28px] font-bold leading-tight p-5">
+        {/* show text */}
+        <p className="font-display p-5 text-[22px] font-bold uppercase leading-tight tracking-normal text-white sm:text-[28px]">
           Find your trusted barber
         </p>
       </div>

@@ -71,7 +71,9 @@ function ProfileRow({
         <Icon size={18} />
       </div>
       <div className="min-w-0">
+        {/* show text */}
         <p className="text-xs font-semibold uppercase text-[#8a7560]">{label}</p>
+        {/* show text */}
         <p className="break-words text-sm font-medium text-[#181411]">{valueOrDash(value)}</p>
       </div>
     </div>
@@ -112,6 +114,7 @@ export default function BarberProfilePage() {
     <div className="min-h-screen bg-white pb-28 text-[#181411]">
       <BarberHeader title="Profile" />
 
+      {/* show main content */}
       <main className="mx-auto max-w-3xl px-4 py-4">
         {loading && <p className="text-sm text-[#8a7560]">Loading profile...</p>}
         {error && <p className="text-sm text-red-600">{error}</p>}
@@ -124,12 +127,16 @@ export default function BarberProfilePage() {
                   <Image src={avatar} alt="Barber profile" fill className="object-cover" unoptimized />
                 </div>
                 <div className="min-w-0 flex-1">
+                  {/* show the main heading */}
                   <h1 className="truncate text-xl font-bold">{data?.user?.name || "Barber"}</h1>
+                  {/* show text */}
                   <p className="truncate text-sm text-[#8a7560]">{data?.user?.email}</p>
                   <div className="mt-2 flex flex-wrap gap-2">
+                    {/* show inline text */}
                     <span className="rounded-full bg-[#fff4ea] px-3 py-1 text-xs font-semibold text-[#9a4b00]">
                       {subscriptionLabel}
                     </span>
+                    {/* show inline text */}
                     <span className="rounded-full bg-[#f5f2f0] px-3 py-1 text-xs font-semibold">
                       {serviceCount} services
                     </span>

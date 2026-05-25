@@ -3,12 +3,16 @@ import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "@/database/dbConnect";
 import { requireAuth } from "@/lib/authGuard";
 import User from "@/models/User";
+import { enforceRateLimit, rateLimitProfiles } from "@/server/security/rateLimit";
 
 const PASSWORD_SALT_ROUNDS = 10;
 const MIN_PASSWORD_LENGTH = 8;
 const MAX_PASSWORD_LENGTH = 72;
 
 export async function POST(req: NextRequest) {
+  const limited = await enforceRateLimit(req, rateLimitProfiles.sensitive);
+  if (limited) return limited;
+
   await connectToDatabase();
 
   const { user, unauthorized } = await requireAuth(req);

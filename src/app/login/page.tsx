@@ -162,10 +162,12 @@ function LoginPageContent() {
       footerLink={isSignupMode ? "/login" : "/register"}
       footerLinkText={isSignupMode ? "Sign In" : "Sign Up"}
     >
+      {/* show the main heading */}
       <h1 className="mt-4 mb-3 text-center text-[22px] font-bold text-[#1c130d]">
         {isSignupMode ? "Create Account" : "Welcome Back"}
       </h1>
 
+      {/* show text */}
       <p className="py-2 text-center text-sm text-[#9e6b47]">
         {isSignupMode
           ? "Choose how you want to create your account"
@@ -188,12 +190,14 @@ function LoginPageContent() {
               type="button"
               className="flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-[#e5e5e5] bg-white text-sm font-semibold text-[#1c130d] shadow-sm transition-all hover:bg-[#faf6f4] active:scale-[0.98]"
             >
+              {/* show inline text */}
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#db4437] text-white">
                 <Circle className="h-4 w-4 rotate-45" strokeWidth={3} />
               </span>
               Continue with Google
             </button>
           ) : (
+            // show text
             <p className="text-center text-sm text-[#9e6b47]">
               Google sign-in is unavailable until the production OAuth variables are configured.
             </p>
@@ -262,6 +266,7 @@ export default function LoginPage() {
     <Suspense
       fallback={
         <div className="flex min-h-screen items-center justify-center bg-[#fcfaf8] text-[#1c130d]">
+          {/* show text */}
           <p className="text-sm font-medium">Loading sign in...</p>
         </div>
       }

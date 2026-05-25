@@ -1,8 +1,3 @@
-/**
- * AUTO-FILE-COMMENT: src/app/dashboard/barber/bookings/page.tsx
- * Purpose: Explains the role of this module and documents its functions.
- * Notes: Comments are documentation-only and do not change runtime behavior.
- */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -12,22 +7,7 @@ import { fetchBookings, updateBooking } from "@/features/bookings/bookingsSlice"
 import Link from "next/link";
 import BottomNav, { barberNavItems } from "@/components/BottomNav";
 
-/**
- * AUTO-FUNCTION-COMMENT: getDisplayName
- * Purpose: Handles get display name.
- * Line-by-line:
- * 1. Executes `if (typeof value === "string" && value.trim()) return value;`.
- * 2. Executes `if (`.
- * 3. Executes `typeof value === "object" &&`.
- * 4. Executes `value !== null &&`.
- * 5. Executes `"name" in value &&`.
- * 6. Executes `typeof value.name === "string" &&`.
- * 7. Executes `value.name.trim()`.
- * 8. Executes `) {`.
- * 9. Executes `return value.name;`.
- * 10. Executes `}`.
- * 11. Executes `return fallback;`.
- */
+
 function getDisplayName(value: unknown, fallback: string) {
   if (typeof value === "string" && value.trim()) return value;
   if (
@@ -42,83 +22,7 @@ function getDisplayName(value: unknown, fallback: string) {
   return fallback;
 }
 
-/**
- * AUTO-FUNCTION-COMMENT: BarberBookingsPage
- * Purpose: Handles barber bookings page.
- * Line-by-line:
- * 1. Executes `const dispatch = useAppDispatch();`.
- * 2. Executes `const { items, loading } = useAppSelector((state) => state.bookings);`.
- * 3. Executes `const [changes, setChanges] = useState<Record<string, string>>({});`.
- * 4. Executes `useEffect(() => {`.
- * 5. Executes `dispatch(fetchBookings());`.
- * 6. Executes `}, [dispatch]);`.
- * 7. Executes `const handleReschedule = (id: string) => {`.
- * 8. Executes `const dateTime = changes[id];`.
- * 9. Executes `if (!dateTime) return;`.
- * 10. Executes `dispatch(updateBooking({ id, data: { dateTime } }));`.
- * 11. Executes `};`.
- * 12. Executes `const handleDecline = (id: string) => {`.
- * 13. Executes `dispatch(updateBooking({ id, data: { status: "declined" } }));`.
- * 14. Executes `};`.
- * 15. Executes `const handleComplete = (id: string) => {`.
- * 16. Executes `dispatch(updateBooking({ id, data: { status: "completed" } }));`.
- * 17. Executes `};`.
- * 18. Executes `return (`.
- * 19. Executes `<div className="min-h-screen bg-white pb-24">`.
- * 20. Executes `<BarberHeader title="Bookings" />`.
- * 21. Executes `<div className="p-4 space-y-4">`.
- * 22. Executes `{loading && <p>Loading bookings...</p>}`.
- * 23. Executes `{!loading && items.length === 0 && <p>No bookings yet.</p>}`.
- * 24. Executes `{!loading &&`.
- * 25. Executes `items.map((booking) => (`.
- * 26. Executes `<div key={booking._id} className="border rounded-lg p-3 space-y-2">`.
- * 27. Executes `<Link href={\`/bookings/${booking._id}\`} className="font-semibold block">`.
- * 28. Executes `{booking.service}`.
- * 29. Executes `</Link>`.
- * 30. Executes `<div className="text-sm text-gray-500">`.
- * 31. Executes `{new Date(booking.dateTime).toLocaleString()}`.
- * 32. Executes `</div>`.
- * 33. Executes `<div className="text-sm text-gray-500">`.
- * 34. Executes `Status: {booking.status || "pending"}`.
- * 35. Executes `</div>`.
- * 36. Executes `<div className="text-sm text-gray-500">`.
- * 37. Executes `Client: {(booking as any).clientId?.name || "Unknown"}`.
- * 38. Executes `</div>`.
- * 39. Executes `<div className="flex gap-2 items-center">`.
- * 40. Executes `<input`.
- * 41. Executes `type="datetime-local"`.
- * 42. Executes `className="border rounded px-2 py-1"`.
- * 43. Executes `value={changes[booking._id] || ""}`.
- * 44. Executes `onChange={(e) =>`.
- * 45. Executes `setChanges({ ...changes, [booking._id]: e.target.value })`.
- * 46. Executes `}`.
- * 47. Executes `/>`.
- * 48. Executes `<button`.
- * 49. Executes `className="px-3 py-1 bg-[#f2800d] text-white rounded"`.
- * 50. Executes `onClick={() => handleReschedule(booking._id)}`.
- * 51. Executes `>`.
- * 52. Executes `Reschedule`.
- * 53. Executes `</button>`.
- * 54. Executes `<button`.
- * 55. Executes `className="px-3 py-1 border text-red-600 rounded"`.
- * 56. Executes `onClick={() => handleDecline(booking._id)}`.
- * 57. Executes `>`.
- * 58. Executes `Decline`.
- * 59. Executes `</button>`.
- * 60. Executes `<button`.
- * 61. Executes `className="px-3 py-1 border text-green-600 rounded"`.
- * 62. Executes `onClick={() => handleComplete(booking._id)}`.
- * 63. Executes `>`.
- * 64. Executes `End Booking`.
- * 65. Executes `</button>`.
- * 66. Executes `</div>`.
- * 67. Executes `</div>`.
- * 68. Executes `))}`.
- * 69. Executes `</div>`.
- * 70. Executes `<BottomNav items={barberNavItems} activeItem="Bookings" />`.
- * 71. Executes `</div>`.
- * 72. Executes `);`.
- */
+
 export default function BarberBookingsPage() {
   const dispatch = useAppDispatch();
   const { items, loading } = useAppSelector((state) => state.bookings);
@@ -128,36 +32,19 @@ export default function BarberBookingsPage() {
     dispatch(fetchBookings());
   }, [dispatch]);
 
-  /**
-   * AUTO-FUNCTION-COMMENT: handleReschedule
-   * Purpose: Handles handle reschedule.
-   * Line-by-line:
-   * 1. Executes `const dateTime = changes[id];`.
-   * 2. Executes `if (!dateTime) return;`.
-   * 3. Executes `dispatch(updateBooking({ id, data: { dateTime } }));`.
-   */
+  
   const handleReschedule = (id: string) => {
     const dateTime = changes[id];
     if (!dateTime) return;
     dispatch(updateBooking({ id, data: { dateTime } }));
   };
 
-  /**
-   * AUTO-FUNCTION-COMMENT: handleDecline
-   * Purpose: Handles handle decline.
-   * Line-by-line:
-   * 1. Executes `dispatch(updateBooking({ id, data: { status: "declined" } }));`.
-   */
+  
   const handleDecline = (id: string) => {
     dispatch(updateBooking({ id, data: { status: "declined" } }));
   };
 
-  /**
-   * AUTO-FUNCTION-COMMENT: handleComplete
-   * Purpose: Handles handle complete.
-   * Line-by-line:
-   * 1. Executes `dispatch(updateBooking({ id, data: { status: "completed" } }));`.
-   */
+  
   const handleComplete = (id: string) => {
     dispatch(updateBooking({ id, data: { status: "completed" } }));
   };
@@ -187,6 +74,7 @@ export default function BarberBookingsPage() {
               </div>
 
               <div className="flex gap-2 items-center">
+                {/* show an input field */}
                 <input
                   type="datetime-local"
                   className="border rounded px-2 py-1"

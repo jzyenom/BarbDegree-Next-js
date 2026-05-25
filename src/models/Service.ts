@@ -1,16 +1,6 @@
-/**
- * AUTO-FILE-COMMENT: src/models/Service.ts
- * Purpose: Explains the role of this module and documents its functions.
- * Notes: Comments are documentation-only and do not change runtime behavior.
- */
 import mongoose, { Schema, models } from "mongoose";
 
-/**
- * AUTO-FUNCTION-COMMENT: normalizeServiceName
- * Purpose: Handles normalize service name.
- * Line-by-line:
- * 1. Executes `value.trim().replace(/\s+/g, " ").toLowerCase()`.
- */
+
 const normalizeServiceName = (value: string) =>
   value.trim().replace(/\s+/g, " ").toLowerCase();
 

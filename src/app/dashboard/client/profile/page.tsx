@@ -45,7 +45,9 @@ function ProfileRow({
         <Icon size={18} />
       </div>
       <div className="min-w-0">
+        {/* show text */}
         <p className="text-xs font-semibold uppercase text-[#8a7560]">{label}</p>
+        {/* show text */}
         <p className="break-words text-sm font-medium text-[#181411]">{valueOrDash(value)}</p>
       </div>
     </div>
@@ -89,6 +91,7 @@ export default function ClientProfilePage() {
         right={<LogoutButton />}
       />
 
+      {/* show main content */}
       <main className="mx-auto max-w-3xl px-4 py-4">
         {loading && <p className="text-sm text-[#8a7560]">Loading profile...</p>}
         {error && <p className="text-sm text-red-600">{error}</p>}
@@ -101,8 +104,11 @@ export default function ClientProfilePage() {
                   <Image src={avatar} alt="Client profile" fill className="object-cover" unoptimized />
                 </div>
                 <div className="min-w-0">
+                  {/* show the main heading */}
                   <h1 className="truncate text-xl font-bold">{data?.user?.name || "Client"}</h1>
+                  {/* show text */}
                   <p className="truncate text-sm text-[#8a7560]">{data?.user?.email}</p>
+                  {/* show inline text */}
                   <span className="mt-2 inline-flex rounded-full bg-[#fff4ea] px-3 py-1 text-xs font-semibold text-[#9a4b00]">
                     Client
                   </span>

@@ -155,6 +155,7 @@ export default function PublicBarberProfilePage() {
       {!loading && error && <p className="px-4 py-6 text-sm text-red-600">{error}</p>}
 
       {!loading && !error && barber && (
+        // show main content
         <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 pb-12">
           <section className="flex gap-4 pt-4">
             <div
@@ -162,15 +163,19 @@ export default function PublicBarberProfilePage() {
               style={{ backgroundImage: `url(${barber.avatar || "/avatar.svg"})` }}
             />
             <div className="min-w-0 flex-1">
+              {/* show the main heading */}
               <h1 className="text-2xl font-black">{barber.name}</h1>
+              {/* show text */}
               <p className="text-sm text-zinc-500">
                 {barber.shopName || barber.location || "Location unavailable"}
               </p>
               <div className="mt-2 flex flex-wrap items-center gap-2">
+                {/* show inline text */}
                 <span className="inline-flex items-center gap-1 text-sm font-semibold">
                   <Star size={16} fill="#f2800d" stroke="none" />
                   {barber.rating ?? "No rating"} ({barber.reviews})
                 </span>
+                {/* show inline text */}
                 <span className="text-sm text-zinc-500">
                   {barber.completedJobs} completed jobs
                 </span>
@@ -178,6 +183,7 @@ export default function PublicBarberProfilePage() {
               {barber.badges.length > 0 && (
                 <div className="mt-3 flex flex-wrap gap-2">
                   {barber.badges.map((badge) => (
+                    // show inline text
                     <span
                       key={badge}
                       className="rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-700"
@@ -193,6 +199,7 @@ export default function PublicBarberProfilePage() {
           {barber.bio && (
             <section>
               <h2 className="text-lg font-bold">About</h2>
+              {/* show text */}
               <p className="mt-2 text-sm leading-6 text-zinc-600">{barber.bio}</p>
             </section>
           )}
@@ -208,25 +215,31 @@ export default function PublicBarberProfilePage() {
                   Book
                 </Link>
               ) : (
+                // show inline text
                 <span className="text-sm font-semibold text-red-600">Unavailable</span>
               )}
             </div>
 
             <div className="mt-3 divide-y rounded-lg border border-zinc-200">
               {barber.services.length === 0 && (
+                // show text
                 <p className="p-4 text-sm text-zinc-500">No active services yet.</p>
               )}
               {barber.services.map((service) => (
                 <div key={service._id} className="flex justify-between gap-4 p-4">
                   <div>
+                    {/* show text */}
                     <p className="font-semibold">{service.name}</p>
                     {service.description && (
+                      // show text
                       <p className="mt-1 text-sm text-zinc-500">{service.description}</p>
                     )}
+                    {/* show text */}
                     <p className="mt-1 text-xs text-zinc-500">
                       {service.durationMinutes ?? 30} min
                     </p>
                   </div>
+                  {/* show text */}
                   <p className="shrink-0 font-bold">NGN {service.price}</p>
                 </div>
               ))}
@@ -237,6 +250,7 @@ export default function PublicBarberProfilePage() {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-lg font-bold">Rate Barber</h2>
+                {/* show text */}
                 <p className="text-sm text-zinc-500">
                   Ratings are available once per paid accepted booking. Submitting a rating confirms the service is completed.
                 </p>
@@ -253,6 +267,7 @@ export default function PublicBarberProfilePage() {
             </div>
 
             {isClient && !canRate && (
+              // show text
               <p className="mt-4 rounded-lg bg-zinc-50 p-3 text-sm text-zinc-500">
                 No paid accepted booking is currently available to rate.
               </p>
@@ -261,6 +276,7 @@ export default function PublicBarberProfilePage() {
             {canRate && (
               <div className="mt-4 space-y-4">
                 <label className="block">
+                  {/* show inline text */}
                   <span className="text-sm font-semibold">Booking</span>
                   <select
                     value={selectedBookingId}
@@ -268,6 +284,7 @@ export default function PublicBarberProfilePage() {
                     className="mt-2 h-11 w-full rounded-lg border border-zinc-200 px-3"
                   >
                     {eligibleBookings.map((booking) => (
+                      // show one choice
                       <option key={booking._id} value={booking._id}>
                         {booking.service} - {new Date(booking.dateTime).toLocaleDateString()}
                       </option>
@@ -276,12 +293,14 @@ export default function PublicBarberProfilePage() {
                 </label>
 
                 {selectedBooking && (
+                  // show text
                   <p className="text-xs text-zinc-500">
                     Selected booking: {new Date(selectedBooking.dateTime).toLocaleString()}
                   </p>
                 )}
 
                 <div>
+                  {/* show inline text */}
                   <span className="text-sm font-semibold">Rating</span>
                   <div className="mt-2 flex gap-2">
                     {[1, 2, 3, 4, 5].map((value) => (
@@ -303,7 +322,9 @@ export default function PublicBarberProfilePage() {
                 </div>
 
                 <label className="block">
+                  {/* show inline text */}
                   <span className="text-sm font-semibold">Review</span>
+                  {/* show textarea */}
                   <textarea
                     value={review}
                     onChange={(event) => setReview(event.target.value)}
@@ -314,6 +335,7 @@ export default function PublicBarberProfilePage() {
                 </label>
 
                 {ratingMessage && (
+                  // show text
                   <p className="text-sm text-zinc-600">{ratingMessage}</p>
                 )}
 
@@ -333,18 +355,22 @@ export default function PublicBarberProfilePage() {
             <h2 className="text-lg font-bold">Recent Reviews</h2>
             <div className="mt-3 space-y-3">
               {(!barber.recentReviews || barber.recentReviews.length === 0) && (
+                // show text
                 <p className="text-sm text-zinc-500">No reviews yet.</p>
               )}
               {barber.recentReviews?.map((item) => (
                 <div key={item._id} className="rounded-lg border border-zinc-200 p-4">
                   <div className="flex items-center justify-between gap-3">
+                    {/* show text */}
                     <p className="font-semibold">{item.userId?.name || "Client"}</p>
+                    {/* show inline text */}
                     <span className="inline-flex items-center gap-1 text-sm font-semibold">
                       <Star size={14} fill="#f2800d" stroke="none" />
                       {item.rate}
                     </span>
                   </div>
                   {item.comment && (
+                    // show text
                     <p className="mt-2 text-sm text-zinc-600">{item.comment}</p>
                   )}
                 </div>

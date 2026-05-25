@@ -3,13 +3,17 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --font-system-sans: var(--font-manrope), Arial, Helvetica, sans-serif;
+  --font-display-stack: var(--font-syncopate), var(--font-system-sans);
+  --font-system-mono: "Courier New", Courier, monospace;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-system-sans);
+  --font-display: var(--font-display-stack);
+  --font-mono: var(--font-system-mono);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,5 +26,50 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-system-sans);
+}
+
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+* {
+  min-width: 0;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+a,
+button,
+span {
+  overflow-wrap: anywhere;
+}
+
+.font-inter {
+  font-family: var(--font-system-sans);
+}
+
+.font-display {
+  font-family: var(--font-display-stack);
 }

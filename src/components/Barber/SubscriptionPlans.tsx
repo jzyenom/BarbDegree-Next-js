@@ -113,6 +113,7 @@ export default function SubscriptionPlans() {
         <div>
           <h2 className="text-lg font-bold">Subscription</h2>
           {subscription?.isSubscribed ? (
+            // show text
             <p className="text-sm text-green-700">
               Active{activePlanName ? ` - ${activePlanName}` : ""}
               {subscription.subscriptionExpiresAt
@@ -120,9 +121,11 @@ export default function SubscriptionPlans() {
                 : ""}
             </p>
           ) : (
+            // show text
             <p className="text-sm text-red-600">Inactive - your profile is not bookable.</p>
           )}
         </div>
+        {/* show inline text */}
         <span className="rounded-full bg-[#f5f2f0] px-3 py-1 text-xs font-semibold">
           {subscription?.subscriptionStatus || "inactive"}
         </span>
@@ -136,12 +139,15 @@ export default function SubscriptionPlans() {
             <div className="flex items-start justify-between gap-2">
               <div>
                 <h3 className="font-bold">{plan.name}</h3>
+                {/* show text */}
                 <p className="text-xs text-[#8a7560]">{discountLabel[plan.interval]}</p>
               </div>
+              {/* show inline text */}
               <span className="rounded-full bg-[#fff4ea] px-2 py-1 text-xs font-semibold text-[#9a4b00]">
                 {intervalLabel[plan.interval]}
               </span>
             </div>
+            {/* show text */}
             <p className="mt-4 text-2xl font-bold">{formatNaira(plan.amount)}</p>
             <button
               type="button"

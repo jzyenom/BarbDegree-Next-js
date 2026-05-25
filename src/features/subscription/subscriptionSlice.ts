@@ -1,8 +1,3 @@
-/**
- * AUTO-FILE-COMMENT: src/features/subscription/subscriptionSlice.ts
- * Purpose: Explains the role of this module and documents its functions.
- * Notes: Comments are documentation-only and do not change runtime behavior.
- */
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 type SubscriptionState = {

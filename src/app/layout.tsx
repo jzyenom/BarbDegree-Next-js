@@ -1,25 +1,10 @@
-/**
- * AUTO-FILE-COMMENT: src/app/layout.tsx
- * Purpose: Explains the role of this module and documents its functions.
- * Notes: Comments are documentation-only and do not change runtime behavior.
- */
 import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
+import localFont from "next/font/local";
 import Script from "next/script";
 import Providers from "@/components/Providers";
 import { authOptions } from "@/lib/authOptions";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -74,20 +59,31 @@ const browserExtensionAttributeCleanup = `
 })();
 `;
 
-/**
- * AUTO-FUNCTION-COMMENT: RootLayout
- * Purpose: Handles root layout.
- * Line-by-line:
- * 1. Executes `return (`.
- * 2. Executes `<html lang="en" suppressHydrationWarning>`.
- * 3. Executes `<body`.
- * 4. Executes `className={\`${geistSans.variable} ${geistMono.variable} antialiased\`}`.
- * 5. Executes `>`.
- * 6. Executes `<Providers>{children}</Providers>`.
- * 7. Executes `</body>`.
- * 8. Executes `</html>`.
- * 9. Executes `);`.
- */
+const manrope = localFont({
+  src: "../../public/fonts/Manrope-Variable.ttf",
+  variable: "--font-manrope",
+  display: "swap",
+  weight: "200 800",
+});
+
+const syncopate = localFont({
+  src: [
+    {
+      path: "../../public/fonts/Syncopate-Regular.ttf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/Syncopate-Bold.ttf",
+      weight: "700",
+      style: "normal",
+    },
+  ],
+  variable: "--font-syncopate",
+  display: "swap",
+});
+
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -96,9 +92,11 @@ export default async function RootLayout({
   const session = await getServerSession(authOptions);
 
   return (
+    // show html
     <html lang="en" suppressHydrationWarning>
+      {/* show body */}
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${manrope.variable} ${syncopate.variable} antialiased`}
         suppressHydrationWarning
       >
         {process.env.NODE_ENV === "development" ? (

@@ -1,8 +1,3 @@
-/**
- * AUTO-FILE-COMMENT: src/models/Notification.ts
- * Purpose: Explains the role of this module and documents its functions.
- * Notes: Comments are documentation-only and do not change runtime behavior.
- */
 import mongoose, { Schema, models } from "mongoose";
 
 const NotificationSchema = new Schema(

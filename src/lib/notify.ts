@@ -1,8 +1,3 @@
-/**
- * AUTO-FILE-COMMENT: src/lib/notify.ts
- * Purpose: Explains the role of this module and documents its functions.
- * Notes: Comments are documentation-only and do not change runtime behavior.
- */
 import Notification from "@/models/Notification";
 import { getSocketServer } from "@/lib/socketServer";
 
@@ -14,23 +9,7 @@ type NotifyInput = {
   data?: Record<string, unknown>;
 };
 
-/**
- * AUTO-FUNCTION-COMMENT: notifyUser
- * Purpose: Handles notify user.
- * Line-by-line:
- * 1. Executes `const notification = await Notification.create({`.
- * 2. Executes `userId: input.userId,`.
- * 3. Executes `title: input.title,`.
- * 4. Executes `message: input.message,`.
- * 5. Executes `type: input.type ?? "info",`.
- * 6. Executes `data: input.data ?? {},`.
- * 7. Executes `});`.
- * 8. Executes `const io = getSocketServer();`.
- * 9. Executes `if (io) {`.
- * 10. Executes `io.to(input.userId).emit("notification", notification);`.
- * 11. Executes `}`.
- * 12. Executes `return notification;`.
- */
+
 export async function notifyUser(input: NotifyInput) {
   const notification = await Notification.create({
     userId: input.userId,

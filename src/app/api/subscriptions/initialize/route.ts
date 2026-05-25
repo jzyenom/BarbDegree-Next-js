@@ -8,6 +8,7 @@ import Barber from "@/models/Barber";
 import Plan from "@/models/Plan";
 import Subscription from "@/models/Subscription";
 import Transaction from "@/models/Transaction";
+import { enforceRateLimit, rateLimitProfiles } from "@/server/security/rateLimit";
 
 function resolveAppUrl(req: NextRequest) {
   return process.env.NEXT_PUBLIC_URL || process.env.NEXT_PUBLIC_APP_URL || new URL(req.url).origin;
@@ -18,6 +19,9 @@ function makeReference(barberId: string) {
 }
 
 export async function POST(req: NextRequest) {
+  const limited = await enforceRateLimit(req, rateLimitProfiles.payment);
+  if (limited) return limited;
+
   await connectToDatabase();
   await ensureDefaultSubscriptionPlans();
 

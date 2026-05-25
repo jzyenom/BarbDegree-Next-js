@@ -1,8 +1,3 @@
-/**
- * AUTO-FILE-COMMENT: src/models/Barber.ts
- * Purpose: Explains the role of this module and documents its functions.
- * Notes: Comments are documentation-only and do not change runtime behavior.
- */
 import mongoose, { Schema, models } from "mongoose";
 
 const BarberSchema = new Schema(
@@ -13,6 +8,16 @@ const BarberSchema = new Schema(
     country: { type: String, trim: true, maxlength: 80 },
     state: { type: String, trim: true, maxlength: 80 },
     nin: { type: String, trim: true, maxlength: 20, select: false },
+    kycStatus: {
+      type: String,
+      enum: ["incomplete", "verified"],
+      default: "incomplete",
+      index: true,
+    },
+    kycProvider: { type: String, trim: true, maxlength: 80 },
+    kycVerifiedAt: { type: Date },
+    kycRequestId: { type: String, trim: true, maxlength: 120, select: false },
+    kycFailureReason: { type: String, trim: true, maxlength: 300, select: false },
     bankName: { type: String, trim: true, maxlength: 120 },
     accountNo: { type: String, trim: true, maxlength: 20, select: false },
     exp: { type: String, trim: true, maxlength: 80 },

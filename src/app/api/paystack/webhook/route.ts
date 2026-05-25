@@ -11,6 +11,7 @@ import {
 import Barber from "@/models/Barber";
 import Plan from "@/models/Plan";
 import Subscription from "@/models/Subscription";
+import { enforceRateLimit, rateLimitProfiles } from "@/server/security/rateLimit";
 
 type PaystackWebhook = {
   event?: string;
@@ -169,6 +170,9 @@ async function processDisable(data: Record<string, unknown>, session: mongoose.C
 }
 
 export async function POST(req: NextRequest) {
+  const limited = await enforceRateLimit(req, rateLimitProfiles.webhook);
+  if (limited) return limited;
+
   const rawBody = await req.text();
   const signature = req.headers.get("x-paystack-signature");
 

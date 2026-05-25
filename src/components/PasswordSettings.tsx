@@ -75,6 +75,7 @@ export default function PasswordSettings({ hasPassword, onSuccess }: PasswordSet
         <h2 className="text-base font-bold">
           {hasPassword ? "Change Password" : "Add a Password"}
         </h2>
+        {/* show text */}
         <p className="text-sm text-[#8a7560]">
           {hasPassword
             ? "Update your account password for email sign-in."

@@ -6,6 +6,7 @@ import connectToDatabase from "@/database/dbConnect";
 import Barber from "@/models/Barber";
 import User from "@/models/User";
 import { requireAuth } from "@/lib/authGuard";
+import { enforceRateLimit, rateLimitProfiles } from "@/server/security/rateLimit";
 
 const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
 const AVATAR_DIR = path.join(process.cwd(), "public", "uploads", "avatars");
@@ -16,6 +17,9 @@ const ALLOWED_TYPES = new Map([
 ]);
 
 export async function POST(req: NextRequest) {
+  const limited = await enforceRateLimit(req, rateLimitProfiles.upload);
+  if (limited) return limited;
+
   const { user, unauthorized } = await requireAuth(req);
   if (unauthorized) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

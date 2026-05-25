@@ -1,8 +1,3 @@
-/**
- * AUTO-FILE-COMMENT: src/features/notifications/notificationsSlice.ts
- * Purpose: Explains the role of this module and documents its functions.
- * Notes: Comments are documentation-only and do not change runtime behavior.
- */
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export type Notification = {
@@ -54,12 +49,7 @@ const notificationsSlice = createSlice({
   name: "notifications",
   initialState,
   reducers: {
-    /**
-     * AUTO-FUNCTION-COMMENT: addNotification
-     * Purpose: Handles add notification.
-     * Line-by-line:
-     * 1. Executes `state.items.unshift(action.payload);`.
-     */
+    
     addNotification(state, action: PayloadAction<Notification>) {
       state.items.unshift(action.payload);
     },

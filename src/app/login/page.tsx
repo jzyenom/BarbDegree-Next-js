@@ -4,10 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   ArrowLeft,
-  BatteryFull,
   EyeOff,
-  SignalHigh,
-  Wifi,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getProviders, signIn, useSession } from "next-auth/react";

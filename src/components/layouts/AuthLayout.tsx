@@ -19,10 +19,10 @@ export default function AuthLayout({
   footerLinkText,
 }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-[#fcfaf8] text-[#1c130d] font-inter">
+    <div className="mobile-screen mobile-shell flex flex-col justify-between bg-[#fcfaf8] text-[#1c130d] font-inter">
       <AuthHeader title={title} />
       {/* show main content */}
-      <main className="flex flex-col items-center w-full px-4">{children}</main>
+      <main className="mobile-scroll flex w-full flex-col items-center px-4">{children}</main>
       <AuthFooter
         text={footerText}
         link={footerLink}

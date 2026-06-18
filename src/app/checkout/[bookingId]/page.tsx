@@ -143,20 +143,20 @@ export default function CheckoutPage() {
   const canPay = booking.status === "confirmed" && !isPaid;
 
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-white">
-      <div>
+    <div className="mobile-screen mobile-shell flex flex-col bg-white">
+      <div className="mobile-scroll pb-20">
         <HeaderBack title="Checkout" />
 
-        <div className="px-4 pt-3 pb-2">
-          <h2 className="text-[22px] font-bold text-[#181411]">Review & Pay</h2>
+        <div className="px-4 pb-1 pt-3">
+          <h2 className="text-lg font-bold text-[#181411]">Review & Pay</h2>
           {/* show text */}
           <p className="text-sm text-[#8a7560] mt-1">
             Payment opens after the barber accepts the booking.
           </p>
         </div>
 
-        <div className="px-4 py-3">
-          <div className="rounded-2xl border border-[#f0e8e0] bg-[#fcfaf8] p-4">
+        <div className="px-4 py-2">
+          <div className="rounded-2xl border border-[#f0e8e0] bg-[#fcfaf8] p-3">
             {/* show text */}
             <p className="text-sm text-[#8a7560]">Booking ID</p>
             {/* show text */}
@@ -182,8 +182,8 @@ export default function CheckoutPage() {
         <DetailRow icon={<MapPin size={24} />} label="Address" value={booking.address || "Not provided"} />
         <DetailRow icon={<Wallet size={24} />} label="Amount" value={formatNaira(payableAmount)} />
 
-        <div className="px-4 pt-3">
-          <div className="rounded-xl border border-[#f0e8e0] bg-white p-4">
+        <div className="px-4 pt-2">
+          <div className="rounded-xl border border-[#f0e8e0] bg-white p-3">
             <div className="flex items-center justify-between gap-2">
               {/* show inline text */}
               <span className="text-sm text-[#8a7560]">Booking Status</span>
@@ -215,25 +215,24 @@ export default function CheckoutPage() {
         )}
       </div>
 
-      <div>
-        <div className="px-4 py-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="px-4 py-3">
+          <div className="grid grid-cols-3 gap-2">
             <button
-              className="h-12 rounded-lg bg-[#f5f2f0] font-bold text-[#181411]"
+              className="h-11 rounded-lg bg-[#f5f2f0] text-xs font-bold text-[#181411]"
               onClick={() => router.push(`/bookings/${booking._id}`)}
               disabled={paying}
             >
               Pay Later
             </button>
             <button
-              className="h-12 rounded-lg border border-[#f2800d] font-bold text-[#f2800d]"
+              className="h-11 rounded-lg border border-[#f2800d] text-xs font-bold text-[#f2800d]"
               onClick={() => router.push("/transactions")}
               disabled={paying}
             >
               Transactions
             </button>
             <button
-              className="h-12 rounded-lg bg-[#f2800d] font-bold text-white disabled:bg-[#f0b67b]"
+              className="h-11 rounded-lg bg-[#f2800d] text-xs font-bold text-white disabled:bg-[#f0b67b]"
               onClick={handlePayNow}
               disabled={paying || !canPay}
             >
@@ -247,9 +246,8 @@ export default function CheckoutPage() {
             </button>
           </div>
         </div>
-
-        <BottomNav activeItem="Bookings" />
       </div>
+      <BottomNav activeItem="Bookings" />
     </div>
   );
 }

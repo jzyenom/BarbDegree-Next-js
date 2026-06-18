@@ -12,10 +12,10 @@ interface HeaderBackProps {
 export default function HeaderBack({ title }: HeaderBackProps) {
   const router = useRouter();
   return (
-    <div className="flex items-center bg-white p-4 pb-2 justify-between">
+    <div className="safe-top flex items-center justify-between bg-white px-3 pb-1">
       <button
         onClick={() => router.back()}
-        className="text-[#181411] flex size-12 items-center"
+        className="flex size-10 items-center text-[#181411]"
       >
         <ArrowLeft size={24} />
       </button>

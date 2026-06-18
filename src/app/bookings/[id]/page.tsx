@@ -105,7 +105,7 @@ export default function BookingDetailsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="mobile-screen mobile-shell flex flex-col bg-white">
       <HeaderBack title="Booking Details" />
 
       {loading && <p className="px-4 py-6 text-sm text-gray-500">Loading...</p>}
@@ -114,7 +114,7 @@ export default function BookingDetailsPage() {
         <p className="px-4 py-6 text-sm text-red-600">{error}</p>
       )}
       {!loading && !error && booking && (
-        <div className="pb-10">
+        <div className="mobile-scroll pb-4">
           <DetailRow icon={<Scissors size={24} />} label="Service" value={servicesLabel} />
           <DetailRow
             icon={<Calendar size={24} />}
@@ -137,17 +137,17 @@ export default function BookingDetailsPage() {
           />
 
           {isBarber && (
-            <div className="px-4 pt-6 space-y-3">
+            <div className="space-y-3 px-4 pt-4">
               <div className="flex gap-3">
                 <button
-                  className="flex-1 h-11 rounded-lg bg-green-600 text-white font-bold"
+                  className="h-11 flex-1 rounded-lg bg-green-600 font-bold text-white"
                   onClick={() => updateBooking({ status: "confirmed" })}
                   disabled={actionLoading}
                 >
                   Accept
                 </button>
                 <button
-                  className="flex-1 h-11 rounded-lg bg-red-600 text-white font-bold"
+                  className="h-11 flex-1 rounded-lg bg-red-600 font-bold text-white"
                   onClick={() => updateBooking({ status: "declined" })}
                   disabled={actionLoading || !canDecline}
                 >
@@ -183,11 +183,11 @@ export default function BookingDetailsPage() {
             </div>
           )}
 
-          <div className="px-4 py-6">
+          <div className="px-4 py-4">
             <div className="space-y-3">
               {canClientPay && (
                 <button
-                  className="w-full h-12 rounded-lg bg-[#f2800d] text-white font-bold"
+                  className="h-11 w-full rounded-lg bg-[#f2800d] font-bold text-white"
                   onClick={() => router.push(`/checkout/${id}`)}
                 >
                   Pay Now
@@ -195,14 +195,14 @@ export default function BookingDetailsPage() {
               )}
               {canClientRate && (
                 <button
-                  className="w-full h-12 rounded-lg bg-[#f2800d] text-white font-bold"
+                  className="h-11 w-full rounded-lg bg-[#f2800d] font-bold text-white"
                   onClick={() => router.push(`/barbers/${barberProfileId}`)}
                 >
                   Rate Barber and Confirm Completion
                 </button>
               )}
               <button
-                className="w-full h-12 rounded-lg bg-[#f5f2f0] text-[#181411] font-bold"
+                className="h-11 w-full rounded-lg bg-[#f5f2f0] font-bold text-[#181411]"
                 onClick={() => router.back()}
               >
                 Back

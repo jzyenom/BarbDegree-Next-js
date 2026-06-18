@@ -198,15 +198,15 @@ function ClientBookingFormContent() {
     (step === 3 && selectedServiceIds.length > 0);
 
   return (
-    <div className="min-h-screen bg-white pb-28">
-      <div>
+    <div className="mobile-screen mobile-shell flex flex-col bg-white">
+      <div className="mobile-scroll pb-20">
         <div className="flex items-center bg-white p-4 pb-2 justify-between">
           <h2 className="text-[#181411] text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">
             Book Appointment
           </h2>
         </div>
 
-        <div className="flex justify-center gap-3 py-5">
+        <div className="flex justify-center gap-3 py-3">
           <div
             className={`h-2 w-2 rounded-full ${step >= 1 ? "bg-[#181411]" : "bg-[#e6e0db]"}`}
           />
@@ -227,7 +227,7 @@ function ClientBookingFormContent() {
 
         <form onSubmit={handleSubmit} className="max-w-[480px] mx-auto">
           {step === 1 && (
-            <div className="px-4 py-3 space-y-3">
+          <div className="space-y-3 px-4 py-2">
               {/* show text */}
               <p className="text-[#181411] text-base font-medium pb-1">
                 Select Barber
@@ -239,7 +239,7 @@ function ClientBookingFormContent() {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 {barbers.map((barber) => {
                   const unavailable = !barber.bookable;
                   return (
@@ -250,13 +250,13 @@ function ClientBookingFormContent() {
                         setBarberId(barber._id);
                         if (unavailable) setStep(1);
                       }}
-                      className={`rounded-xl border p-3 text-left ${
+                      className={`rounded-xl border p-2 text-left ${
                         barberId === barber._id
                           ? "border-[#f2800d] bg-[#fff4ea]"
                           : "border-[#eee]"
                       } ${unavailable ? "opacity-65" : ""}`}
                     >
-                      <div className="h-20 w-full overflow-hidden rounded-lg bg-[#f5f2f0]">
+                      <div className="h-16 w-full overflow-hidden rounded-lg bg-[#f5f2f0]">
                         <Image
                           src={barber.avatar || "/avatar.svg"}
                           alt={barber.name || "Barber"}
@@ -295,7 +295,7 @@ function ClientBookingFormContent() {
           {step === 2 && (
             <>
               {(["name", "email", "address"] as const).map((field) => (
-                <div key={field} className="px-4 py-3">
+                <div key={field} className="px-4 py-2">
                   <label className="flex flex-col min-w-40 flex-1">
                     {/* show text */}
                     <p className="text-[#181411] text-base font-medium pb-2 capitalize">
@@ -307,14 +307,14 @@ function ClientBookingFormContent() {
                       value={form[field]}
                       onChange={handleChange}
                       placeholder={`Enter your ${field}`}
-                      className="form-input w-full rounded-lg bg-[#f5f2f0] text-[#181411] p-4 h-14 placeholder:text-[#8a7560] focus:ring-0 focus:outline-0 border-none"
+                    className="form-input h-11 w-full rounded-lg border-none bg-[#f5f2f0] p-3 text-[#181411] placeholder:text-[#8a7560] focus:outline-0 focus:ring-0"
                       required={field !== "address"}
                     />
                   </label>
                 </div>
               ))}
 
-              <div className="px-4 py-3">
+              <div className="px-4 py-2">
                 <label className="flex flex-col">
                   {/* show text */}
                   <p className="text-[#181411] text-base font-medium pb-2">
@@ -326,13 +326,13 @@ function ClientBookingFormContent() {
                     name="dateTime"
                     value={form.dateTime}
                     onChange={handleChange}
-                    className="form-input w-full rounded-lg bg-[#f5f2f0] text-[#181411] p-4 h-14 focus:ring-0 border-none"
+                    className="form-input h-11 w-full rounded-lg border-none bg-[#f5f2f0] p-3 text-[#181411] focus:ring-0"
                     required
                   />
                 </label>
               </div>
 
-              <div className="px-4 py-3">
+              <div className="px-4 py-2">
                 <label className="flex flex-col">
                   {/* show text */}
                   <p className="text-[#181411] text-base font-medium pb-2">Note</p>
@@ -342,7 +342,7 @@ function ClientBookingFormContent() {
                     value={form.note}
                     onChange={handleChange}
                     placeholder="Add a note (optional)"
-                    className="form-textarea w-full min-h-36 rounded-lg bg-[#f5f2f0] text-[#181411] p-4 placeholder:text-[#8a7560] focus:ring-0 border-none"
+                    className="form-textarea min-h-20 w-full rounded-lg border-none bg-[#f5f2f0] p-3 text-[#181411] placeholder:text-[#8a7560] focus:ring-0"
                   />
                 </label>
               </div>
@@ -350,8 +350,8 @@ function ClientBookingFormContent() {
           )}
 
           {step === 3 && (
-            <div className="px-4 py-6">
-              <div className="rounded-2xl bg-[#3f4a57] p-6 text-white">
+            <div className="px-4 py-3">
+              <div className="rounded-2xl bg-[#3f4a57] p-4 text-white">
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h3 className="text-lg font-semibold">Select Services</h3>
@@ -376,7 +376,7 @@ function ClientBookingFormContent() {
                     This barber has not added any active services yet.
                   </div>
                 ) : (
-                  <div className="mt-5 space-y-3">
+                  <div className="mt-4 space-y-2">
                     {services.map((service) => {
                       const selected = selectedServiceIds.includes(service._id);
                       return (
@@ -384,7 +384,7 @@ function ClientBookingFormContent() {
                           key={service._id}
                           type="button"
                           onClick={() => handleToggleService(service._id)}
-                          className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition-all ${
+                          className={`flex w-full items-center justify-between rounded-xl border px-3 py-2 text-left transition-all ${
                             selected
                               ? "border-white bg-white/10"
                               : "border-white/25 hover:border-white/60"
@@ -409,7 +409,7 @@ function ClientBookingFormContent() {
                 )}
 
                 {selectedServices.length > 0 && (
-                  <div className="mt-6 space-y-2">
+                  <div className="mt-4 space-y-2">
                     {selectedServices.map((service) => (
                       <div
                         key={service._id}
@@ -436,9 +436,9 @@ function ClientBookingFormContent() {
                 )}
               </div>
 
-              <div className="mt-6">
+              <div className="mt-4">
                 <div
-                  className="bg-cover bg-center flex flex-col items-stretch justify-end rounded-lg pt-[132px]"
+                  className="flex flex-col items-stretch justify-end rounded-lg bg-cover bg-center pt-20"
                   style={{
                     backgroundImage:
                       "linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 100%), url('https://images.unsplash.com/photo-1595433562696-a8b4e3c5f4ef?auto=format&fit=crop&w=500&q=80')",
@@ -446,7 +446,7 @@ function ClientBookingFormContent() {
                 >
                   <div className="flex w-full items-end justify-between gap-4 p-4">
                     {/* show text */}
-                    <p className="text-white text-2xl font-bold leading-tight flex-1">
+                    <p className="flex-1 text-lg font-bold leading-tight text-white">
                       Estimated Price: NGN {estimatedPrice}
                     </p>
                   </div>
@@ -455,12 +455,12 @@ function ClientBookingFormContent() {
             </div>
           )}
 
-          <div className="flex gap-3 px-4 py-6">
+          <div className="flex gap-3 px-4 py-3">
             <button
               type="button"
               onClick={() => setStep((previous) => Math.max(1, previous - 1))}
               disabled={step === 1}
-              className="flex-1 h-12 rounded-lg bg-[#f5f2f0] text-[#181411] font-bold disabled:opacity-60"
+              className="h-11 flex-1 rounded-lg bg-[#f5f2f0] font-bold text-[#181411] disabled:opacity-60"
             >
               Previous
             </button>
@@ -469,7 +469,7 @@ function ClientBookingFormContent() {
                 type="button"
                 disabled={!canGoNext || selectedBarberUnavailable}
                 onClick={() => setStep((previous) => Math.min(3, previous + 1))}
-                className="flex-1 h-12 rounded-lg bg-[#f2800d] text-[#181411] font-bold disabled:opacity-60 disabled:cursor-not-allowed"
+                className="h-11 flex-1 rounded-lg bg-[#f2800d] font-bold text-[#181411] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Next
               </button>
@@ -477,7 +477,7 @@ function ClientBookingFormContent() {
               <button
                 type="submit"
                 disabled={loading || selectedServiceIds.length === 0 || selectedBarberUnavailable}
-                className="flex-1 h-12 rounded-lg bg-[#f2800d] text-[#181411] font-bold disabled:opacity-60 disabled:cursor-not-allowed"
+                className="h-11 flex-1 rounded-lg bg-[#f2800d] font-bold text-[#181411] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {loading ? "Processing..." : "Place Order"}
               </button>

@@ -13,12 +13,12 @@ interface AuthFooterProps {
 
 export default function AuthFooter({ text, link, linkText }: AuthFooterProps) {
   // return empty spacing when no text exists
-  if (!text) return <div className="h-6 bg-[#fcfaf8]" />;
+  if (!text) return <div className="h-3 bg-[#fcfaf8]" />;
 
   // show the footer content
   return (
     // render footer section
-    <footer className="py-4">
+    <footer className="safe-bottom py-2">
       {/* show footer text */}
       <p className="text-[#9e6b47] text-sm text-center underline">
         {/* display text content */}

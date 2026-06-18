@@ -17,16 +17,16 @@ export default function ClientBookingsPage() {
   }, [dispatch]);
 
   return (
-    <div className="min-h-screen bg-white pb-28">
+    <div className="mobile-screen mobile-shell flex flex-col bg-white">
       <HeaderBack title="My Bookings" />
 
-      <div className="p-4 space-y-4">
+      <div className="mobile-scroll space-y-3 p-4 pb-20">
         {loading && <p>Loading bookings...</p>}
         {!loading && items.length === 0 && <p>No bookings yet.</p>}
 
         {!loading &&
           items.map((booking) => (
-            <div key={booking._id} className="border rounded-lg p-3 space-y-2">
+            <div key={booking._id} className="space-y-1 rounded-lg border p-3">
               <Link href={`/bookings/${booking._id}`} className="font-semibold block">
                 {booking.service}
               </Link>

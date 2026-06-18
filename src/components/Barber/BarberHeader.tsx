@@ -8,11 +8,11 @@ import PageHeader from "@/components/ui/PageHeader";
 export default function BarberHeader({ title }: { title: string }) {
   const router = useRouter();
   return (
-    <div className="mt-5">
+    <div className="safe-top">
       <PageHeader
         title={title}
-        className="pb-2 border-b border-gray-100"
-        titleClassName="text-2xl"
+        className="border-b border-gray-100 pb-1"
+        titleClassName="text-xl"
         left={
           <button
             type="button"

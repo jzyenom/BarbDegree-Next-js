@@ -27,10 +27,10 @@ export default function AuthInput({
         onChange={onChange}
         type={type}
         placeholder={placeholder}
-        className="w-full h-14 rounded-xl bg-[#f4ece6] text-[#1c130d] placeholder:text-[#9e6b47] px-4 focus:outline-none"
+        className="h-11 w-full rounded-xl bg-[#f4ece6] px-4 pr-11 text-[#1c130d] placeholder:text-[#9e6b47] focus:outline-none"
       />
       {Icon && (
-        <Icon className="absolute right-4 top-4 text-[#9e6b47]" size={20} />
+        <Icon className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9e6b47]" size={18} />
       )}
     </div>
   );

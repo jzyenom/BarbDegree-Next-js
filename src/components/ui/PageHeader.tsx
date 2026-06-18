@@ -21,7 +21,7 @@ export default function PageHeader({
   return (
     // show the header
     <header
-      className={`flex items-center justify-between bg-white p-4 ${className}`}
+      className={`flex items-center justify-between bg-white px-3 py-2 ${className}`}
     >
       <div className="flex items-center justify-start">{left}</div>
       {/* show the main heading */}

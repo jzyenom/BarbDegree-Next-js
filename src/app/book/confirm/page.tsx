@@ -325,11 +325,11 @@ export default function ConfirmBookingPage({
   }
 
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-white">
-      <div>
+    <div className="mobile-screen mobile-shell flex flex-col bg-white">
+      <div className="mobile-scroll pb-20">
         <HeaderBack title="Booking Confirmation" />
 
-        <h2 className="text-[#181411] text-[22px] font-bold px-4 pt-5 pb-3">Service Details</h2>
+        <h2 className="px-4 pb-2 pt-3 text-lg font-bold text-[#181411]">Service Details</h2>
 
         <DetailRow icon={<Scissors size={24} />} label="Service" value={payload.service} />
         <DetailRow icon={<Calendar size={24} />} label="Date" value={new Date(payload.dateTime).toLocaleDateString()} />
@@ -338,27 +338,26 @@ export default function ConfirmBookingPage({
         <DetailRow icon={<DollarSign size={24} />} label="Estimated Price" value={formatNaira(payload.estimatedPrice)} />
       </div>
 
-      <div>
         <div className="px-4 py-3">
-          <div className="flex gap-3">
+          <div className="grid grid-cols-3 gap-2">
             <button
-              className="flex-1 h-12 rounded-lg bg-[#f5f2f0] text-[#181411] font-bold"
+              className="h-11 rounded-lg bg-[#f5f2f0] font-bold text-[#181411]"
               onClick={() => router.back()}
               disabled={loading}
             >
               Edit
             </button>
 
-            <div className="flex-1 grid grid-cols-2 gap-3">
+            <div className="col-span-2 grid grid-cols-2 gap-2">
               <button
-                className="h-12 rounded-lg bg-white border border-[#f2800d] text-[#f2800d] font-bold"
+                className="h-11 rounded-lg border border-[#f2800d] bg-white text-xs font-bold text-[#f2800d]"
                 onClick={handleConfirmWithoutPay}
                 disabled={loading}
               >
                 Confirm (No Pay)
               </button>
               <button
-                className="h-12 rounded-lg bg-[#f2800d] text-white font-bold"
+                className="h-11 rounded-lg bg-[#f2800d] text-xs font-bold text-white"
                 onClick={handleConfirmAndPay}
                 disabled={loading}
               >
@@ -369,9 +368,8 @@ export default function ConfirmBookingPage({
 
           {message && <p className="mt-3 text-sm text-center text-[#8a7560]">{message}</p>}
         </div>
-
-        <BottomNav activeItem="Bookings" />
       </div>
+      <BottomNav activeItem="Bookings" />
     </div>
   );
 }

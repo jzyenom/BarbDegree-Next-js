@@ -57,18 +57,18 @@ export default function RoleSelectionPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
+    <div className="mobile-screen mobile-shell safe-x safe-top safe-bottom flex flex-col items-center justify-center bg-gray-50 text-center">
       {/* show the main heading */}
-      <h1 className="text-2xl font-semibold mb-6">Tell us who you are</h1>
+      <h1 className="mb-3 text-2xl font-semibold">Tell us who you are</h1>
       {/* show text */}
-      <p className="text-gray-600 mb-8">
+      <p className="mb-6 text-sm text-gray-600">
         Choose your role to personalize your experience
       </p>
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid w-full grid-cols-2 gap-3">
         <button
           onClick={() => handleRoleSelect("barber")}
           disabled={loading}
-          className="p-6 rounded-xl border-2 border-gray-200 hover:border-orange-500 hover:bg-orange-50 transition-all disabled:opacity-50"
+          className="rounded-xl border-2 border-gray-200 p-4 transition-all hover:border-orange-500 hover:bg-orange-50 disabled:opacity-50"
         >
           <h2 className="font-semibold mt-2">I&apos;m a Barber</h2>
         </button>
@@ -76,7 +76,7 @@ export default function RoleSelectionPage() {
         <button
           onClick={() => handleRoleSelect("client")}
           disabled={loading}
-          className="p-6 rounded-xl border-2 border-gray-200 hover:border-orange-500 hover:bg-orange-50 transition-all disabled:opacity-50"
+          className="rounded-xl border-2 border-gray-200 p-4 transition-all hover:border-orange-500 hover:bg-orange-50 disabled:opacity-50"
         >
           <h2 className="font-semibold mt-2">I&apos;m a Client</h2>
         </button>

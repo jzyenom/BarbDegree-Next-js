@@ -13,11 +13,11 @@ export default function StatCard({
   percentageChange,
 }: StatCardProps) {
   return (
-    <div className="flex min-w-72 flex-1 flex-col gap-2">
+    <div className="flex min-w-0 flex-1 flex-col gap-1">
       {/* show text */}
       <p className="text-[#181411] text-base font-medium">{title}</p>
       {/* show text */}
-      <p className="text-[#181411] text-[32px] font-bold tracking-tight truncate">
+      <p className="truncate text-2xl font-bold tracking-tight text-[#181411]">
         {amount}
       </p>
 

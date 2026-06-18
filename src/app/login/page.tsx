@@ -70,7 +70,7 @@ function AuthField({
 }: AuthFieldProps) {
   return (
     <label className="block">
-      <span className="mb-[16px] block text-[23px] font-normal leading-none text-[#2d2d2d]">
+      <span className="mb-2 block text-base font-medium leading-none text-[#2d2d2d]">
         {label}
       </span>
       <span className="relative block">
@@ -78,12 +78,12 @@ function AuthField({
           type={type}
           value={value}
           onChange={onChange}
-          className="h-[84px] w-full rounded-[14px] border border-[#c7c7c7] bg-white px-5 pr-14 text-[20px] text-[#111] outline-none transition focus:border-[#1f1f1f]"
+          className="h-12 w-full rounded-xl border border-[#c7c7c7] bg-white px-4 pr-12 text-base text-[#111] outline-none transition focus:border-[#1f1f1f]"
         />
         {showPasswordIcon ? (
           <EyeOff
             aria-hidden="true"
-            className="absolute right-9 top-1/2 h-7 w-7 -translate-y-1/2 text-[#c0c0c0]"
+            className="absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#c0c0c0]"
             strokeWidth={2}
           />
         ) : null}
@@ -255,25 +255,25 @@ function LoginPageContent() {
   const submitBlocked = isSubmitting || (isSignupMode && !acceptedTerms);
 
   return (
-    <main className="min-h-[100svh] bg-white text-[#1f1f1f]">
-      <div className="mx-auto min-h-[100svh] w-full max-w-[556px] bg-white">
+    <main className="mobile-screen bg-white text-[#1f1f1f]">
+      <div className="mobile-shell mobile-screen bg-white">
         {/* <StatusBar /> */}
 
-        <div className="px-[35px] pb-10">
+        <div className="mobile-scroll px-6 pb-4">
           <button
             type="button"
             onClick={() => router.back()}
             aria-label="Go back"
-            className="mt-[30px] flex h-12 w-12 items-center justify-start text-[#222]"
+            className="safe-top flex h-10 w-10 items-center justify-start text-[#222]"
           >
-            <ArrowLeft className="h-11 w-11" strokeWidth={2.5} />
+            <ArrowLeft className="h-8 w-8" strokeWidth={2.5} />
           </button>
 
-          <h1 className="mt-[46px] text-[46px] font-semibold leading-none tracking-normal text-black">
+          <h1 className="mt-5 text-4xl font-semibold leading-none tracking-normal text-black">
             {isSignupMode ? "Sign Up" : "Sign In"}
           </h1>
 
-          <form onSubmit={handleSubmit} className="mt-[48px] space-y-[18px]">
+          <form onSubmit={handleSubmit} className="mt-6 space-y-3">
             {isSignupMode ? (
               <AuthField
                 label="Name"
@@ -298,12 +298,12 @@ function LoginPageContent() {
             />
 
             {isSignupMode ? (
-              <label className="flex items-center gap-[16px] pt-[20px] text-[17px] leading-tight text-[#2d2d2d]">
+              <label className="flex items-center gap-3 pt-1 text-sm leading-tight text-[#2d2d2d]">
                 <input
                   type="checkbox"
                   checked={acceptedTerms}
                   onChange={(event) => setAcceptedTerms(event.target.checked)}
-                  className="h-[30px] w-[30px] shrink-0 appearance-none rounded-[4px] border-[3px] border-[#c8c8c8] bg-white checked:border-[#1f1f1f] checked:bg-[#1f1f1f]"
+                  className="h-6 w-6 shrink-0 appearance-none rounded border-2 border-[#c8c8c8] bg-white checked:border-[#1f1f1f] checked:bg-[#1f1f1f]"
                 />
                 <span>
                   I agree with{" "}
@@ -327,7 +327,7 @@ function LoginPageContent() {
             <button
               disabled={submitBlocked}
               type="submit"
-              className="mt-[24px] flex h-[84px] w-full items-center justify-center rounded-[13px] bg-[#1f1f1f] text-[24px] font-semibold text-white transition active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-[#c6c6c6]"
+              className="mt-3 flex h-12 w-full items-center justify-center rounded-xl bg-[#1f1f1f] text-base font-semibold text-white transition active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-[#c6c6c6]"
             >
               {isSubmitting
                 ? isSignupMode
@@ -339,44 +339,44 @@ function LoginPageContent() {
             </button>
           </form>
 
-          <div className="mt-[46px] flex items-center gap-[15px] text-[16px] text-[#2d2d2d]">
+          <div className="mt-6 flex items-center gap-3 text-sm text-[#2d2d2d]">
             <span className="h-px flex-1 bg-[#c9c9c9]" />
             <span>{isSignupMode ? "Or sign up with" : "Or sign in with"}</span>
             <span className="h-px flex-1 bg-[#c9c9c9]" />
           </div>
 
-          <div className="mt-[50px] flex items-center justify-center gap-[144px]">
+          <div className="mt-5 flex items-center justify-center gap-16">
             <button
               type="button"
               onClick={() => void handleGoogleLogin()}
               disabled={loadingProviders || !hasGoogleProvider}
               aria-label="Continue with Google"
-              className="flex h-[59px] w-[59px] items-center justify-center rounded-[10px] bg-[#f2f8ff] text-[34px] font-bold leading-none disabled:opacity-40"
+              className="flex h-12 w-12 items-center justify-center rounded-[10px] bg-[#f2f8ff] text-[34px] font-bold leading-none disabled:opacity-40"
             >
               <Image
                 src="/social_icons/Google.png"
                 alt=""
                 width={43}
                 height={43}
-                className="h-[43px] w-[43px] object-contain"
+                className="h-8 w-8 object-contain"
               />
             </button>
             <button
               type="button"
               aria-label="Continue with Apple"
-              className="flex h-[59px] w-[59px] items-center justify-center rounded-[10px] bg-[#f6fbff] text-black"
+              className="flex h-12 w-12 items-center justify-center rounded-[10px] bg-[#f6fbff] text-black"
             >
               <Image
                 src="/social_icons/Apple Inc.png"
                 alt=""
                 width={43}
                 height={43}
-                className="h-[43px] w-[43px] object-contain"
+                className="h-8 w-8 object-contain"
               />
             </button>
           </div>
 
-          <p className="mt-[58px] text-center text-[20px] text-[#2d2d2d]">
+          <p className="mt-6 text-center text-base text-[#2d2d2d]">
             {isSignupMode
               ? "Already have an account?"
               : "Don't have an account?"}{" "}

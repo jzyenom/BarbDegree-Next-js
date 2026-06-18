@@ -50,10 +50,10 @@ export default function BarberServicesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-[#f2800d] pb-24">
+    <div className="mobile-screen mobile-shell flex flex-col bg-white text-[#f2800d]">
       <BarberHeader title="Services" />
 
-      <div className="p-4 max-w-[640px] mx-auto space-y-6">
+      <div className="mobile-scroll mx-auto w-full max-w-[640px] space-y-4 p-4 pb-20">
         <div className="border rounded-lg p-3 text-sm">
           Subscription status:{" "}
           {subscription.isSubscribed ? "Subscribed" : "Not subscribed"}
@@ -63,10 +63,10 @@ export default function BarberServicesPage() {
             {error}
           </div>
         )}
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-2">
           {/* show an input field */}
           <input
-            className="w-full border rounded-lg p-3"
+            className="w-full rounded-lg border p-2.5"
             placeholder="Service name"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -74,14 +74,14 @@ export default function BarberServicesPage() {
           />
           {/* show an input field */}
           <input
-            className="w-full border rounded-lg p-3"
+            className="w-full rounded-lg border p-2.5"
             placeholder="Description"
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
           />
           {/* show an input field */}
           <input
-            className="w-full border rounded-lg p-3"
+            className="w-full rounded-lg border p-2.5"
             placeholder="Price"
             type="number"
             value={form.price}
@@ -90,7 +90,7 @@ export default function BarberServicesPage() {
           />
           {/* show an input field */}
           <input
-            className="w-full border rounded-lg p-3"
+            className="w-full rounded-lg border p-2.5"
             placeholder="Duration (minutes)"
             type="number"
             value={form.durationMinutes}
@@ -98,7 +98,7 @@ export default function BarberServicesPage() {
               setForm({ ...form, durationMinutes: e.target.value })
             }
           />
-          <button className="w-full h-12 rounded-lg bg-[#f2800d] text-white font-bold">
+          <button className="h-11 w-full rounded-lg bg-[#f2800d] font-bold text-white">
             Add Service
           </button>
         </form>
@@ -109,7 +109,7 @@ export default function BarberServicesPage() {
             items.map((service) => (
               <div
                 key={service._id}
-                className="border rounded-lg p-3 flex items-center justify-between"
+                className="flex items-center justify-between gap-3 rounded-lg border p-3"
               >
                 <div>
                   <div className="font-semibold">{service.name}</div>
@@ -120,7 +120,7 @@ export default function BarberServicesPage() {
                     {service.price} NGN - {service.durationMinutes} min
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex shrink-0 flex-col gap-2">
                   <button
                     className="px-3 py-1 rounded border"
                     onClick={() =>

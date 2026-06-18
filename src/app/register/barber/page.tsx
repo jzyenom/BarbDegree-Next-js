@@ -223,21 +223,21 @@ export default function BarberSignup() {
       footerLinkText="Sign In"
     >
       {/* Progress Bar */}
-      <div className="w-full max-w-[480px] mx-auto mb-6">
-        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+      <div className="mx-auto mb-3 w-full max-w-[480px]">
+        <div className="h-1.5 overflow-hidden rounded-full bg-gray-200">
           <div
-            className="h-2 bg-[#f96b06] rounded-full transition-all duration-500 ease-in-out"
+            className="h-1.5 rounded-full bg-[#f96b06] transition-all duration-500 ease-in-out"
             style={{ width: `${progress}%` }}
           />
         </div>
         {/* show text */}
-        <p className="text-xs text-center text-[#9e6b47] mt-2 font-medium">
+        <p className="mt-1 text-center text-xs font-medium text-[#9e6b47]">
           Step {step} of {totalSteps} — {Math.round(progress)}% Complete
         </p>
       </div>
 
       {/* show the main heading */}
-      <h1 className="text-[22px] font-bold text-center mt-2 mb-3">
+      <h1 className="mb-3 mt-1 text-center text-lg font-bold">
         {step === 1
           ? "Upload Image"
           : step === 2
@@ -249,12 +249,12 @@ export default function BarberSignup() {
 
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-[480px] space-y-4 transition-all"
+        className="w-full max-w-[480px] space-y-3 pb-2 transition-all"
       >
         {/* Step 1: Upload Image */}
         {step === 1 && (
           <div className="flex flex-col items-center space-y-3">
-            <div className="relative w-40 h-40 rounded-full border-4 border-transparent bg-gradient-to-br from-green-300 to-teal-400 p-[3px] shadow-md">
+            <div className="relative h-32 w-32 rounded-full border-4 border-transparent bg-gradient-to-br from-green-300 to-teal-400 p-[3px] shadow-md">
               <div className="relative w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
                 {preview ? (
                   <Image
@@ -270,7 +270,7 @@ export default function BarberSignup() {
               </div>
               <label
                 htmlFor="image"
-                className="absolute bottom-3 right-3 bg-[#f96b06] text-white rounded-full p-3 cursor-pointer shadow-lg hover:bg-orange-600 transition"
+                className="absolute bottom-2 right-2 cursor-pointer rounded-full bg-[#f96b06] p-2 text-white shadow-lg transition hover:bg-orange-600"
               >
                 <ImageIcon size={18} />
               </label>
@@ -398,12 +398,12 @@ export default function BarberSignup() {
         )}
 
         {/* Navigation Buttons */}
-        <div className="pt-6 space-y-3">
+        <div className="space-y-2 pt-3">
           {step > 1 && (
             <button
               type="button"
               onClick={handleBack}
-              className="w-full h-12 rounded-xl border border-[#f96b06] text-[#f96b06] font-bold hover:bg-[#fff5ef] transition-all"
+              className="h-11 w-full rounded-xl border border-[#f96b06] font-bold text-[#f96b06] transition-all hover:bg-[#fff5ef]"
             >
               <ArrowLeft size={18} className="inline-block mr-2" />
               Back
@@ -414,14 +414,14 @@ export default function BarberSignup() {
             <button
               type="button"
               onClick={handleNext}
-              className="w-full h-12 rounded-xl bg-[#f96b06] text-white font-bold tracking-wide hover:bg-orange-600 transition-all"
+                className="h-11 w-full rounded-xl bg-[#f96b06] font-bold tracking-wide text-white transition-all hover:bg-orange-600"
             >
               Next <ArrowRight size={18} className="inline-block ml-2" />
             </button>
           ) : (
             <button
               type="submit"
-              className="w-full h-12 rounded-xl bg-[#f96b06] text-[#fcfaf8] text-base font-bold tracking-wide"
+              className="h-11 w-full rounded-xl bg-[#f96b06] text-base font-bold tracking-wide text-[#fcfaf8]"
             >
               Save & Continue
             </button>

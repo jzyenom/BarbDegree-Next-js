@@ -86,7 +86,7 @@ export default function BottomNav({
 
   return (
     <nav
-      className={`fixed bottom-8 left-1/2 z-50 h-[46px] -translate-x-1/2 rounded-[25px] bg-[#212020] px-6 shadow-[0_12px_28px_rgba(0,0,0,0.25)] ${className}`}
+      className={`fixed bottom-[calc(env(safe-area-inset-bottom)+12px)] left-1/2 z-50 h-11 max-w-[calc(100vw-32px)] -translate-x-1/2 rounded-[24px] bg-[#212020] px-5 shadow-[0_10px_24px_rgba(0,0,0,0.22)] ${className}`}
       aria-label="Primary navigation"
     >
       <div className="flex h-full items-center gap-4">
@@ -99,7 +99,7 @@ export default function BottomNav({
               key={name}
               href={href}
               aria-label={name}
-              className="flex h-[25px] w-[25px] items-center justify-center"
+              className="flex h-6 w-6 items-center justify-center"
             >
               <NavIcon icon={icon} isActive={isActive} name={name} />
             </Link>

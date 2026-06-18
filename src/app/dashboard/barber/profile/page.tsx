@@ -66,8 +66,8 @@ function ProfileRow({
   value?: string | number | null;
 }) {
   return (
-    <div className="flex min-h-14 items-center gap-3 border-b border-[#f1ebe5] py-3 last:border-0">
-      <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#f5f2f0] text-[#181411]">
+    <div className="flex min-h-12 items-center gap-3 border-b border-[#f1ebe5] py-2 last:border-0">
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#f5f2f0] text-[#181411]">
         <Icon size={18} />
       </div>
       <div className="min-w-0">
@@ -111,24 +111,24 @@ export default function BarberProfilePage() {
   const serviceCount = data?.barber?.services?.length ?? 0;
 
   return (
-    <div className="min-h-screen bg-white pb-28 text-[#181411]">
+    <div className="mobile-screen mobile-shell flex flex-col bg-white text-[#181411]">
       <BarberHeader title="Profile" />
 
       {/* show main content */}
-      <main className="mx-auto max-w-3xl px-4 py-4">
+      <main className="mobile-scroll mx-auto w-full max-w-3xl px-4 py-3 pb-20">
         {loading && <p className="text-sm text-[#8a7560]">Loading profile...</p>}
         {error && <p className="text-sm text-red-600">{error}</p>}
 
         {!loading && !error && (
-          <div className="space-y-4">
-            <section className="rounded-lg border border-[#e6e0db] p-4">
+          <div className="space-y-3">
+            <section className="rounded-lg border border-[#e6e0db] p-3">
               <div className="flex items-center gap-4">
-                <div className="relative size-20 overflow-hidden rounded-lg bg-[#f5f2f0]">
+                <div className="relative size-16 shrink-0 overflow-hidden rounded-lg bg-[#f5f2f0]">
                   <Image src={avatar} alt="Barber profile" fill className="object-cover" unoptimized />
                 </div>
                 <div className="min-w-0 flex-1">
                   {/* show the main heading */}
-                  <h1 className="truncate text-xl font-bold">{data?.user?.name || "Barber"}</h1>
+                  <h1 className="truncate text-lg font-bold">{data?.user?.name || "Barber"}</h1>
                   {/* show text */}
                   <p className="truncate text-sm text-[#8a7560]">{data?.user?.email}</p>
                   <div className="mt-2 flex flex-wrap gap-2">
@@ -146,7 +146,7 @@ export default function BarberProfilePage() {
               </div>
             </section>
 
-            <section className="rounded-lg border border-[#e6e0db] p-4">
+            <section className="rounded-lg border border-[#e6e0db] p-3">
               <h2 className="mb-2 text-base font-bold">Business Details</h2>
               <ProfileRow icon={MapPin} label="Address" value={data?.barber?.address} />
               <ProfileRow icon={Home} label="Location" value={[data?.barber?.state, data?.barber?.country].filter(Boolean).join(", ")} />
@@ -154,14 +154,14 @@ export default function BarberProfilePage() {
               <ProfileRow icon={Banknote} label="Starting charge" value={data?.barber?.charge} />
             </section>
 
-            <section className="rounded-lg border border-[#e6e0db] p-4">
+            <section className="rounded-lg border border-[#e6e0db] p-3">
               <h2 className="mb-2 text-base font-bold">Contact</h2>
               <ProfileRow icon={Mail} label="Email" value={data?.user?.email} />
               <ProfileRow icon={Phone} label="Mobile" value={data?.barber?.mobile} />
               <ProfileRow icon={Phone} label="WhatsApp" value={data?.barber?.whatsapp} />
             </section>
 
-            <section className="rounded-lg border border-[#e6e0db] p-4">
+            <section className="rounded-lg border border-[#e6e0db] p-3">
               <h2 className="mb-2 text-base font-bold">Subscription</h2>
               <ProfileRow icon={ShieldCheck} label="Status" value={data?.barber?.subscriptionStatus || "inactive"} />
               <ProfileRow

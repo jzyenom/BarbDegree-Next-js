@@ -156,13 +156,13 @@ export default function ClientForm() {
       footerLink="/login"
       footerLinkText="Sign In"
     >
-      <div className="w-full max-w-[480px] space-y-4">
+      <div className="w-full max-w-[480px] space-y-3 pb-2">
         {/* show the main heading */}
-        <h1 className="text-[22px] font-bold text-center mt-2 mb-6">
+        <h1 className="mb-3 mt-1 text-center text-lg font-bold">
           Client Information
         </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3">
           <AuthInput
             name="whatsapp"
             type="text"
@@ -206,7 +206,7 @@ export default function ClientForm() {
 
           <button
             type="submit"
-            className="w-full h-12 rounded-xl bg-[#f96b06] text-white font-bold tracking-wide hover:bg-orange-600 transition-all"
+            className="h-11 w-full rounded-xl bg-[#f96b06] font-bold tracking-wide text-white transition-all hover:bg-orange-600"
           >
             Save & Continue
           </button>

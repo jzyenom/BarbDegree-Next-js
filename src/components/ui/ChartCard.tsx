@@ -1,10 +1,10 @@
 export default function ChartCard() {
   return (
-    <div className="flex min-h-[180px] flex-col gap-8 py-4">
+    <div className="flex min-h-[112px] flex-col gap-3 py-2">
       {/* SVG CHART */}
       <svg
         width="100%"
-        height="148"
+        height="92"
         viewBox="-3 0 478 150"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"

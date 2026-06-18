@@ -50,16 +50,16 @@ export default function BarberBookingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white pb-24">
+    <div className="mobile-screen mobile-shell flex flex-col bg-white">
       <BarberHeader title="Bookings" />
 
-      <div className="p-4 space-y-4">
+      <div className="mobile-scroll space-y-3 p-4 pb-20">
         {loading && <p>Loading bookings...</p>}
         {!loading && items.length === 0 && <p>No bookings yet.</p>}
 
         {!loading &&
           items.map((booking) => (
-            <div key={booking._id} className="border rounded-lg p-3 space-y-2">
+            <div key={booking._id} className="space-y-2 rounded-lg border p-3">
               <Link href={`/bookings/${booking._id}`} className="font-semibold block">
                 {booking.service}
               </Link>
@@ -76,31 +76,31 @@ export default function BarberBookingsPage() {
                 Client: {getDisplayName(booking.clientId, "Unknown")}
               </div>
 
-              <div className="flex gap-2 items-center">
+              <div className="grid grid-cols-2 gap-2">
                 {/* show an input field */}
                 <input
                   type="datetime-local"
-                  className="border rounded px-2 py-1"
+                  className="col-span-2 rounded border px-2 py-1 text-sm"
                   value={changes[booking._id] || ""}
                   onChange={(e) =>
                     setChanges({ ...changes, [booking._id]: e.target.value })
                   }
                 />
                 <button
-                  className="px-3 py-1 bg-[#f2800d] text-white rounded"
+                  className="rounded bg-[#f2800d] px-2 py-1 text-sm text-white"
                   onClick={() => handleReschedule(booking._id)}
                 >
                   Reschedule
                 </button>
                 <button
-                  className="px-3 py-1 border text-red-600 rounded"
+                  className="rounded border px-2 py-1 text-sm text-red-600"
                   onClick={() => handleDecline(booking._id)}
                   disabled={booking.paymentStatus === "paid"}
                 >
                   Decline
                 </button>
                 <button
-                  className="px-3 py-1 border text-green-600 rounded"
+                  className="col-span-2 rounded border px-2 py-1 text-sm text-green-600"
                   onClick={() => handleComplete(booking._id)}
                 >
                   End Booking

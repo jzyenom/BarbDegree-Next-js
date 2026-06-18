@@ -10,11 +10,11 @@ import BottomNav, { barberNavItems } from "@/components/BottomNav";
 
 export default function BarberDashboard() {
   return (
-    <div className="flex flex-col min-h-screen bg-white text-[#181411] justify-between pb-28 font-inter">
-      <div>
+    <div className="mobile-screen mobile-shell flex flex-col bg-white text-[#181411] font-inter">
+      <div className="mobile-scroll pb-20">
         <BarberHeader title="Dashboard" />
 
-        <div className="p-4">
+        <div className="p-3">
           <BarberInfoCard
             name="The Sharp Edge"
             address="123 Main St, Anytown"
@@ -22,7 +22,7 @@ export default function BarberDashboard() {
             imageUrl="https://lh3.googleusercontent.com/aida-public/AB6AXuBIuaix6f85NyYrrU_wfJSOZHrWu8VmEe4YSYkexd1sIlqk2p255iP0T_NupTHqn1LTTl-vSmPs6IfnnXfjnWpvIole60IiOG9GY3tZ8pLr2YXBxmm4M9PbUynte7WkYWiVhVaNSP4LN2qfzRxyRg2sv4IrDoc7HPSeReKoOFx_jjKUhe7alyXAd6tz-PYFZNm8a8M7TsPQtW_BXvh8sDSKL8xJv4pg4ezIgqhQbiHgIDxs_smn6hvgtW8nQG5nDQ6K97ny7ckZIO6i"
           />
 
-          <div className="flex gap-3 py-3 justify-between">
+          <div className="flex justify-between gap-3 py-2">
             <button className="flex-1 h-10 rounded-xl bg-[#f2800d] text-sm font-bold">
               Upgrade Plan
             </button>
@@ -30,7 +30,7 @@ export default function BarberDashboard() {
               View Details
             </button>
           </div>
-          <div className="py-3">
+          <div className="py-2">
             <a
               href="/dashboard/barber/services/add"
               className="block w-full h-10 rounded-xl bg-[#f2800d] text-white text-sm font-bold text-center leading-10"
@@ -42,8 +42,8 @@ export default function BarberDashboard() {
           <BarberRating rating={4.8} totalReviews={234} />
         </div>
 
-        <div className="px-4 pb-3">
-          <h2 className="text-[22px] font-bold mb-3">Gallery</h2>
+        <div className="px-3 pb-2">
+          <h2 className="mb-2 text-lg font-bold">Gallery</h2>
           <BarberGallery />
         </div>
 

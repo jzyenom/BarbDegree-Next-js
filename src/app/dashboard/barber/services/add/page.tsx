@@ -44,18 +44,18 @@ export default function AddServicePage() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-[#f2800d] pb-24">
+    <div className="mobile-screen mobile-shell flex flex-col bg-white text-[#f2800d]">
       <BarberHeader title="Add Service" />
-      <div className="p-4 max-w-[640px] mx-auto">
+      <div className="mobile-scroll mx-auto w-full max-w-[640px] p-4 pb-20">
         {error && (
           <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 mb-4">
             {error}
           </div>
         )}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3">
           {/* show an input field */}
           <input
-            className="w-full border rounded-lg p-3"
+            className="w-full rounded-lg border p-2.5"
             placeholder="Service name"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -63,7 +63,7 @@ export default function AddServicePage() {
           />
           {/* show textarea */}
           <textarea
-            className="w-full border rounded-lg p-3"
+            className="w-full rounded-lg border p-2.5"
             placeholder="Description"
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -71,7 +71,7 @@ export default function AddServicePage() {
           />
           {/* show an input field */}
           <input
-            className="w-full border rounded-lg p-3"
+            className="w-full rounded-lg border p-2.5"
             placeholder="Price (NGN)"
             type="number"
             value={form.price}
@@ -80,7 +80,7 @@ export default function AddServicePage() {
           />
           {/* show an input field */}
           <input
-            className="w-full border rounded-lg p-3"
+            className="w-full rounded-lg border p-2.5"
             placeholder="Duration (minutes)"
             type="number"
             value={form.durationMinutes}
@@ -89,7 +89,7 @@ export default function AddServicePage() {
             }
           />
           <button
-            className="w-full h-12 rounded-lg bg-[#f2800d] text-white font-bold disabled:opacity-50"
+            className="h-11 w-full rounded-lg bg-[#f2800d] font-bold text-white disabled:opacity-50"
             disabled={loading}
           >
             {loading ? "Adding..." : "Add Service"}

@@ -130,7 +130,7 @@ export default function TransactionsPage() {
       </div>
 
       <div>
-        <BottomNav />
+        <BottomNav activeItem="Bookings" />
       </div>
     </div>
   );

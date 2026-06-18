@@ -2,7 +2,9 @@ import bcrypt from "bcryptjs";
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
-import connectToDatabase from "@/database/dbConnect";
+import connectToDatabase, {
+  isDatabaseUnavailableError,
+} from "@/database/dbConnect";
 import {
   getAuthBaseUrl,
   getGoogleOAuthConfig,
@@ -56,6 +58,7 @@ const providers: NextAuthOptions["providers"] = [
   CredentialsProvider({
     name: "Credentials",
     credentials: {
+      name: { label: "Name", type: "text" },
       email: { label: "Email", type: "email" },
       password: { label: "Password", type: "password" },
       intent: { label: "Intent", type: "text" },
@@ -64,6 +67,7 @@ const providers: NextAuthOptions["providers"] = [
       const email = credentials?.email?.trim().toLowerCase();
       const password = credentials?.password?.trim() ?? "";
       const intent = credentials?.intent === "signup" ? "signup" : "signin";
+      const submittedName = credentials?.name?.trim().slice(0, 120);
 
       console.log("[auth][credentials] Authorize called for", redactEmail(email), "intent:", intent);
 
@@ -84,12 +88,14 @@ const providers: NextAuthOptions["providers"] = [
       try {
         await connectToDatabase();
       } catch (error) {
-        console.error("[auth][credentials] Database unavailable during authorize.", {
-          email: redactEmail(email),
-          intent,
-          ...mapErrorToLogMetadata(error),
-        });
-        throw new Error("AUTH_DATABASE_ERROR");
+        if (!isDatabaseUnavailableError(error)) {
+          console.error("[auth][credentials] Database error during authorize.", {
+            email: redactEmail(email),
+            intent,
+            ...mapErrorToLogMetadata(error),
+          });
+        }
+        return null;
       }
 
       let existingUser: InstanceType<typeof User> | null = null;
@@ -102,7 +108,7 @@ const providers: NextAuthOptions["providers"] = [
           intent,
           ...mapErrorToLogMetadata(error),
         });
-        throw new Error("AUTH_DATABASE_ERROR");
+        return null;
       }
 
       if (!existingUser) {
@@ -115,7 +121,7 @@ const providers: NextAuthOptions["providers"] = [
         }
         console.log("[auth][credentials] Creating user for", redactEmail(email));
 
-        const derivedName = email.split("@")[0];
+        const derivedName = submittedName || email.split("@")[0];
         const hashedPassword = await bcrypt.hash(password, PASSWORD_SALT_ROUNDS);
 
         try {
@@ -145,7 +151,7 @@ const providers: NextAuthOptions["providers"] = [
             email: redactEmail(email),
             ...mapErrorToLogMetadata(error),
           });
-          throw new Error("AUTH_DATABASE_ERROR");
+          return null;
         }
       }
 
@@ -279,12 +285,14 @@ export const authOptions: NextAuthOptions = {
 
         return true;
       } catch (error) {
-        console.error("[auth] Failed to sync OAuth user with the database.", {
-          email: redactEmail(authEmail),
-          provider,
-          ...mapErrorToLogMetadata(error),
-        });
-        throw new Error("AUTH_DATABASE_ERROR");
+        if (!isDatabaseUnavailableError(error)) {
+          console.error("[auth] Failed to sync OAuth user with the database.", {
+            email: redactEmail(authEmail),
+            provider,
+            ...mapErrorToLogMetadata(error),
+          });
+        }
+        return false;
       }
     },
     async jwt({ token, user }) {
@@ -313,10 +321,12 @@ export const authOptions: NextAuthOptions = {
           token.role = dbUser.role;
         }
       } catch (error) {
-        console.error("[auth][jwt] Failed to hydrate token from the database.", {
-          email: redactEmail(email),
-          ...mapErrorToLogMetadata(error),
-        });
+        if (!isDatabaseUnavailableError(error)) {
+          console.error("[auth][jwt] Failed to hydrate token from the database.", {
+            email: redactEmail(email),
+            ...mapErrorToLogMetadata(error),
+          });
+        }
       }
 
       return token;

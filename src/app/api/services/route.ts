@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
-import connectToDatabase from "@/database/dbConnect";
+import connectToDatabase, {
+  isDatabaseUnavailableError,
+} from "@/database/dbConnect";
 import Barber from "@/models/Barber";
 import Service from "@/models/Service";
 import { requireAuth } from "@/lib/authGuard";
@@ -26,10 +28,63 @@ function readVirtualServices(barber: BarberWithServices | null) {
 
 
 export async function GET(req: NextRequest) {
-  await connectToDatabase();
-
   const url = new URL(req.url);
+  const stylesOnly = url.searchParams.get("styles") === "true";
   const barberId = url.searchParams.get("barberId");
+
+  try {
+    await connectToDatabase();
+  } catch (error) {
+    if (!isDatabaseUnavailableError(error)) {
+      console.error("[api/services] Database connection failed.", error);
+    }
+
+    return NextResponse.json(
+      {
+        error: "Service data is temporarily unavailable",
+        services: [],
+        styles: [],
+        databaseUnavailable: true,
+      },
+      { status: 503 }
+    );
+  }
+
+  if (stylesOnly) {
+    const limitParam = Number(url.searchParams.get("limit") ?? 8);
+    const limit = Math.min(
+      Math.max(Number.isFinite(limitParam) ? Math.floor(limitParam) : 8, 1),
+      24
+    );
+
+    const styles = await Service.aggregate<{
+      name: string;
+      barberCount: number;
+      serviceCount: number;
+    }>([
+      { $match: { isActive: true } },
+      {
+        $group: {
+          _id: "$nameKey",
+          name: { $first: "$name" },
+          barberIds: { $addToSet: "$barberId" },
+          serviceCount: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          name: 1,
+          serviceCount: 1,
+          barberCount: { $size: "$barberIds" },
+        },
+      },
+      { $sort: { barberCount: -1, serviceCount: -1, name: 1 } },
+      { $limit: limit },
+    ]);
+
+    return NextResponse.json({ styles });
+  }
 
   if (barberId) {
     if (!mongoose.Types.ObjectId.isValid(barberId)) {

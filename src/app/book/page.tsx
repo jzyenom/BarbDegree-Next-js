@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
+import BottomNav from "@/components/BottomNav";
 
 type ServiceItem = {
   _id: string;
@@ -197,7 +198,7 @@ function ClientBookingFormContent() {
     (step === 3 && selectedServiceIds.length > 0);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col justify-between">
+    <div className="min-h-screen bg-white pb-28">
       <div>
         <div className="flex items-center bg-white p-4 pb-2 justify-between">
           <h2 className="text-[#181411] text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">
@@ -484,6 +485,7 @@ function ClientBookingFormContent() {
           </div>
         </form>
       </div>
+      <BottomNav activeItem="Bookings" />
     </div>
   );
 }

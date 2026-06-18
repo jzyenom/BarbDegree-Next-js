@@ -89,7 +89,14 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await getServerSession(authOptions);
+  let session: Awaited<ReturnType<typeof getServerSession>> = null;
+
+  try {
+    session = await getServerSession(authOptions);
+  } catch (error) {
+    // Keep public pages renderable when auth/session hydration cannot reach MongoDB.
+    console.error("[layout] Failed to hydrate server session.", error);
+  }
 
   return (
     // show html

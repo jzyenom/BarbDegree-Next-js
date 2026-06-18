@@ -1,37 +1,14 @@
-// import { Home, List, User } from "lucide-react";
-// import Link from "next/link";
+"use client";
 
-//   const items = [
-//     { name: "Home", icon: Home, active: true },
-//     { name: "Requests", icon: List, active: false },
-//     { name: "Profile", icon: User, active: false },
-//   ];
-
-//   return (
-//     <nav className="border-t border-[#f5f2f0] bg-white flex justify-around py-2">
-//       {items.map(({ name, icon: Icon, active }) => (
-//         <Link
-//           key={name}
-//           href="#"
-//           className={`flex flex-col items-center ${
-//             active ? "text-[#181411]" : "text-[#8a7560]"
-//           }`}
-//         >
-//           <Icon size={24} />
-//           <p className="text-xs font-medium">{name}</p>
-//         </Link>
-//       ))}
-//     </nav>
-//   );
-// }
-
+import Image from "next/image";
 import { Calendar, Home, List, User } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 type NavItem = {
   name: string;
-  icon: LucideIcon;
+  icon: LucideIcon | string;
   href?: string;
   active?: boolean;
 };
@@ -44,9 +21,10 @@ type BottomNavProps = {
 };
 
 export const clientNavItems: NavItem[] = [
-  { name: "Home", icon: Home, active: true, href: "/" },
-  { name: "Book", icon: Calendar, href: "/book" },
-  { name: "Profile", icon: User, href: "/dashboard/client/profile" },
+  { name: "Home", icon: "/assets/home-90.png", href: "/" },
+  { name: "Bookings", icon: "/assets/calendar-91.png", href: "/bookings" },
+  { name: "Messages", icon: "/assets/chat-bubble-93.png", href: "#" },
+  { name: "Profile", icon: "/assets/account-male-92.png", href: "/dashboard/client/profile" },
 ];
 
 export const barberNavItems: NavItem[] = [
@@ -58,55 +36,73 @@ export const barberNavItems: NavItem[] = [
 
 const defaultItems: NavItem[] = clientNavItems;
 
+function isActiveItem(pathname: string | null, item: NavItem, activeItem?: string) {
+  if (activeItem) return activeItem === item.name;
+  if (item.active) return true;
+  if (!pathname || !item.href || item.href === "#") return false;
+
+  if (item.href === "/") return pathname === "/" || pathname === "/dashboard/client";
+  return pathname === item.href || pathname.startsWith(`${item.href}/`);
+}
+
+function NavIcon({
+  icon,
+  isActive,
+  name,
+}: {
+  icon: NavItem["icon"];
+  isActive: boolean;
+  name: string;
+}) {
+  if (typeof icon === "string") {
+    return (
+      <Image
+        src={icon}
+        alt=""
+        width={25}
+        height={25}
+        className="h-[25px] w-[25px]"
+      />
+    );
+  }
+
+  const Icon = icon;
+  return (
+    <Icon
+      size={22}
+      strokeWidth={2.4}
+      className="text-white"
+      fill={isActive && name === "Home" ? "currentColor" : "none"}
+    />
+  );
+}
 
 export default function BottomNav({
   items = defaultItems,
   activeItem,
-  variant = "default",
   className = "",
 }: BottomNavProps) {
-  const navClass =
-    variant === "light"
-      ? "fixed bottom-0 left-0 right-0 bg-white border-t border-[#efe8e2]"
-      : "fixed bottom-0 left-0 right-0 bg-content-light/90 dark:bg-content-dark/90 backdrop-blur-sm border-t border-gray-200 dark:border-gray-700";
+  const pathname = usePathname();
 
   return (
-    // show navigation
-    <nav className={`${navClass} ${className}`}>
-      <div className="flex justify-around h-20 items-center max-w-lg mx-auto">
-        {items.map(({ name, icon: Icon, active, href = "#" }) => {
-          const isActive = activeItem ? activeItem === name : !!active;
-          const itemClass =
-            variant === "light"
-              ? isActive
-                ? "text-[#ff6900] font-semibold"
-                : "text-[#ff6900] font-medium"
-              : isActive
-              ? "text-[#ff6900] font-bold"
-              : "text-[#ff6900] font-medium";
-
-          const iconClass =
-            variant === "light"
-              ? isActive
-                ? "fill-current stroke-current"
-                : "fill-transparent stroke-current"
-              : isActive
-              ? "fill-current stroke-current"
-              : "fill-transparent stroke-current";
+    <nav
+      className={`fixed bottom-8 left-1/2 z-50 h-[46px] -translate-x-1/2 rounded-[25px] bg-[#212020] px-6 shadow-[0_12px_28px_rgba(0,0,0,0.25)] ${className}`}
+      aria-label="Primary navigation"
+    >
+      <div className="flex h-full items-center gap-4">
+        {items.map((item) => {
+          const { name, icon, href = "#" } = item;
+          const isActive = isActiveItem(pathname, item, activeItem);
 
           return (
             <Link
               key={name}
               href={href}
-              className={`group flex flex-col items-center gap-1 ${itemClass} hover:text-[#ff6900]`}
+              aria-label={name}
+              className="flex h-[25px] w-[25px] items-center justify-center"
             >
-              <Icon
-                className={`${iconClass} group-hover:fill-current group-hover:stroke-current`}
-                size={22}
-              />
-            {/* show inline text */}
-            <span className="text-xs">{name}</span>
-          </Link>
+              <NavIcon icon={icon} isActive={isActive} name={name} />
+            </Link>
           );
         })}
       </div>

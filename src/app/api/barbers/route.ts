@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import mongoose from "mongoose";
-import connectToDatabase from "@/database/dbConnect";
+import connectToDatabase, {
+  isDatabaseUnavailableError,
+} from "@/database/dbConnect";
 import Barber from "@/models/Barber";
 import Booking from "@/models/Booking";
 import Review from "@/models/Review";
@@ -68,14 +71,50 @@ type BarberDocWithServices = {
 };
 
 
-export async function GET() {
+function parseBooleanParam(value: string | null) {
+  return value === "true" || value === "1";
+}
+
+function parseLimit(value: string | null) {
+  const numeric = Number(value ?? 0);
+  if (!Number.isFinite(numeric) || numeric <= 0) return null;
+  return Math.min(Math.floor(numeric), 50);
+}
+
+function buildAvailableBarberFilter() {
+  return {
+    $or: [
+      { adminSubscriptionOverride: true, adminForcedSubscriptionStatus: true },
+      {
+        $and: [
+          {
+            $or: [
+              { adminSubscriptionOverride: false },
+              { adminSubscriptionOverride: { $exists: false } },
+            ],
+          },
+          { subscriptionActive: true },
+        ],
+      },
+    ],
+  };
+}
+
+export async function GET(req: NextRequest) {
   try {
+    const url = new URL(req.url);
+    const ratedOnly = parseBooleanParam(url.searchParams.get("rated"));
+    const availableOnly = parseBooleanParam(url.searchParams.get("available"));
+    const sortMode = url.searchParams.get("sort") ?? "reputation";
+    const limit = parseLimit(url.searchParams.get("limit"));
+    const barberFilter = availableOnly ? buildAvailableBarberFilter() : {};
+
     await connectToDatabase();
 
-    const allBarbers = await Barber.find({}).select("_id");
+    const allBarbers = await Barber.find(barberFilter).select("_id");
     await ensureDefaultServicesForBarbers(allBarbers.map((barber) => barber._id));
 
-    const barbers = (await Barber.find({})
+    const barbers = (await Barber.find(barberFilter)
       .populate("userId")
       .populate("shop")
       .populate({
@@ -205,15 +244,34 @@ export async function GET() {
           durationMinutes: service.durationMinutes,
         })),
       };
-    }).sort((a, b) => {
+    })
+      .filter((barber) => !ratedOnly || barber.reviews > 0)
+      .sort((a, b) => {
+      if (sortMode === "rating") {
+        const ratingDelta = (b.rating ?? 0) - (a.rating ?? 0);
+        if (ratingDelta !== 0) return ratingDelta;
+        return b.reviews - a.reviews;
+      }
       if (b.reputationScore !== a.reputationScore) {
         return b.reputationScore - a.reputationScore;
       }
       return b.reviews - a.reviews;
-    });
+    })
+      .slice(0, limit ?? undefined);
 
     return NextResponse.json({ barbers: results });
   } catch (error) {
+    if (isDatabaseUnavailableError(error)) {
+      return NextResponse.json(
+        {
+          error: "Barber data is temporarily unavailable",
+          barbers: [],
+          databaseUnavailable: true,
+        },
+        { status: 503 }
+      );
+    }
+
     console.error("Error fetching barbers:", error);
     return NextResponse.json(
       { error: "Failed to fetch barbers" },

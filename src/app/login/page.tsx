@@ -1,8 +1,14 @@
 "use client";
 
-import AuthInput from "@/components/AuthInput";
-import AuthLayout from "@/components/layouts/AuthLayout";
-import { Circle, Lock, Mail } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
+import {
+  ArrowLeft,
+  BatteryFull,
+  EyeOff,
+  SignalHigh,
+  Wifi,
+} from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getProviders, signIn, useSession } from "next-auth/react";
 import { Suspense, useEffect, useMemo, useState } from "react";
@@ -37,6 +43,58 @@ function mapAuthError(errorCode: string | null, isSignupMode: boolean): string {
   }
 }
 
+type AuthFieldProps = {
+  label: string;
+  type?: string;
+  value: string;
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  showPasswordIcon?: boolean;
+};
+
+// function StatusBar() {
+//   return (
+//     <div className="flex h-[84px] items-center justify-between px-9 text-[#1f1f1f]">
+//       <span className="text-[22px] font-medium leading-none">4:21</span>
+//       <div className="flex items-center gap-2">
+//         <Wifi className="h-7 w-7 fill-[#1f1f1f]" strokeWidth={3} />
+//         <SignalHigh className="h-7 w-7 fill-[#1f1f1f]" strokeWidth={3} />
+//         <BatteryFull className="h-8 w-8" strokeWidth={2.5} />
+//       </div>
+//     </div>
+//   );
+// }
+
+function AuthField({
+  label,
+  type = "text",
+  value,
+  onChange,
+  showPasswordIcon = false,
+}: AuthFieldProps) {
+  return (
+    <label className="block">
+      <span className="mb-[16px] block text-[23px] font-normal leading-none text-[#2d2d2d]">
+        {label}
+      </span>
+      <span className="relative block">
+        <input
+          type={type}
+          value={value}
+          onChange={onChange}
+          className="h-[84px] w-full rounded-[14px] border border-[#c7c7c7] bg-white px-5 pr-14 text-[20px] text-[#111] outline-none transition focus:border-[#1f1f1f]"
+        />
+        {showPasswordIcon ? (
+          <EyeOff
+            aria-hidden="true"
+            className="absolute right-9 top-1/2 h-7 w-7 -translate-y-1/2 text-[#c0c0c0]"
+            strokeWidth={2}
+          />
+        ) : null}
+      </span>
+    </label>
+  );
+}
+
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -65,9 +123,10 @@ function LoginPageContent() {
     () => mapAuthError(searchParams?.get("error") ?? null, isSignupMode),
     [isSignupMode, searchParams]
   );
-  const [authMethod, setAuthMethod] = useState<"choice" | "manual">("choice");
+  const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [error, setError] = useState(queryErrorMessage);
   const [hasGoogleProvider, setHasGoogleProvider] = useState(false);
   const [loadingProviders, setLoadingProviders] = useState(true);
@@ -86,9 +145,6 @@ function LoginPageContent() {
 
         const googleEnabled = Boolean(providers?.google);
         setHasGoogleProvider(googleEnabled);
-        if (!googleEnabled) {
-          setAuthMethod("manual");
-        }
       } catch (providerError) {
         console.error("[login] Failed to load auth providers.", providerError);
 
@@ -136,6 +192,12 @@ function LoginPageContent() {
 
     const normalizedEmail = email.trim().toLowerCase();
     const trimmedPassword = password.trim();
+    const trimmedName = displayName.trim();
+
+    if (isSignupMode && trimmedName.length < 2) {
+      setError("Enter your name.");
+      return;
+    }
 
     if (!EMAIL_PATTERN.test(normalizedEmail)) {
       setError("Enter a valid email address.");
@@ -147,10 +209,16 @@ function LoginPageContent() {
       return;
     }
 
+    if (isSignupMode && !acceptedTerms) {
+      setError("Agree to the Terms of Service and Privacy Policy to continue.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const result = await signIn("credentials", {
+        name: isSignupMode ? trimmedName : undefined,
         email: normalizedEmail,
         password: trimmedPassword,
         intent: isSignupMode ? "signup" : "signin",
@@ -182,109 +250,146 @@ function LoginPageContent() {
     );
   }
 
+  const alternateHref = isSignupMode
+    ? "/login"
+    : selectedRole
+      ? `/login?mode=signup&role=${selectedRole}`
+      : "/register";
+  const submitBlocked = isSubmitting || (isSignupMode && !acceptedTerms);
+
   return (
-    <AuthLayout
-      title={isSignupMode ? "Sign Up" : "Sign In"}
-      footerText={isSignupMode ? "Already have an account?" : "Don't have an account?"}
-      footerLink={isSignupMode ? "/login" : "/register"}
-      footerLinkText={isSignupMode ? "Sign In" : "Sign Up"}
-    >
-      {/* show the main heading */}
-      <h1 className="mt-4 mb-3 text-center text-[22px] font-bold text-[#1c130d]">
-        {isSignupMode ? "Create Account" : "Welcome Back"}
-      </h1>
+    <main className="min-h-[100svh] bg-white text-[#1f1f1f]">
+      <div className="mx-auto min-h-[100svh] w-full max-w-[556px] bg-white">
+        {/* <StatusBar /> */}
 
-      {/* show text */}
-      <p className="py-2 text-center text-sm text-[#9e6b47]">
-        {isSignupMode
-          ? "Choose how you want to create your account"
-          : "Choose how you want to sign in"}
-      </p>
+        <div className="px-[35px] pb-10">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            aria-label="Go back"
+            className="mt-[30px] flex h-12 w-12 items-center justify-start text-[#222]"
+          >
+            <ArrowLeft className="h-11 w-11" strokeWidth={2.5} />
+          </button>
 
-      {authMethod === "choice" ? (
-        <div className="w-full max-w-[480px] space-y-4">
-          {loadingProviders ? (
+          <h1 className="mt-[46px] text-[46px] font-semibold leading-none tracking-normal text-black">
+            {isSignupMode ? "Sign Up" : "Sign In"}
+          </h1>
+
+          <form onSubmit={handleSubmit} className="mt-[48px] space-y-[18px]">
+            {isSignupMode ? (
+              <AuthField
+                label="Name"
+                value={displayName}
+                onChange={(event) => setDisplayName(event.target.value)}
+              />
+            ) : null}
+
+            <AuthField
+              label="Email"
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+            />
+
+            <AuthField
+              label="Password"
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              showPasswordIcon
+            />
+
+            {isSignupMode ? (
+              <label className="flex items-center gap-[16px] pt-[20px] text-[17px] leading-tight text-[#2d2d2d]">
+                <input
+                  type="checkbox"
+                  checked={acceptedTerms}
+                  onChange={(event) => setAcceptedTerms(event.target.checked)}
+                  className="h-[30px] w-[30px] shrink-0 appearance-none rounded-[4px] border-[3px] border-[#c8c8c8] bg-white checked:border-[#1f1f1f] checked:bg-[#1f1f1f]"
+                />
+                <span>
+                  I agree with{" "}
+                  <Link href="/terms" className="font-semibold">
+                    Terms of Service
+                  </Link>{" "}
+                  and{" "}
+                  <Link href="/privacy" className="font-semibold">
+                    Privacy Policy
+                  </Link>
+                </span>
+              </label>
+            ) : null}
+
+            {error ? (
+              <p className="pt-1 text-center text-sm font-medium text-red-600">
+                {error}
+              </p>
+            ) : null}
+
             <button
-              disabled
-              type="button"
-              className="flex h-12 w-full items-center justify-center rounded-xl border border-[#e5e5e5] bg-white text-sm font-semibold text-[#7d6c61]"
+              disabled={submitBlocked}
+              type="submit"
+              className="mt-[24px] flex h-[84px] w-full items-center justify-center rounded-[13px] bg-[#1f1f1f] text-[24px] font-semibold text-white transition active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-[#c6c6c6]"
             >
-              Loading sign-in methods...
+              {isSubmitting
+                ? isSignupMode
+                  ? "Signing Up..."
+                  : "Signing In..."
+                : isSignupMode
+                  ? "Sign Up"
+                  : "Sign In"}
             </button>
-          ) : hasGoogleProvider ? (
+          </form>
+
+          <div className="mt-[46px] flex items-center gap-[15px] text-[16px] text-[#2d2d2d]">
+            <span className="h-px flex-1 bg-[#c9c9c9]" />
+            <span>{isSignupMode ? "Or sign up with" : "Or sign in with"}</span>
+            <span className="h-px flex-1 bg-[#c9c9c9]" />
+          </div>
+
+          <div className="mt-[50px] flex items-center justify-center gap-[144px]">
             <button
+              type="button"
               onClick={() => void handleGoogleLogin()}
-              type="button"
-              className="flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-[#e5e5e5] bg-white text-sm font-semibold text-[#1c130d] shadow-sm transition-all hover:bg-[#faf6f4] active:scale-[0.98]"
+              disabled={loadingProviders || !hasGoogleProvider}
+              aria-label="Continue with Google"
+              className="flex h-[59px] w-[59px] items-center justify-center rounded-[10px] bg-[#f2f8ff] text-[34px] font-bold leading-none disabled:opacity-40"
             >
-              {/* show inline text */}
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#db4437] text-white">
-                <Circle className="h-4 w-4 rotate-45" strokeWidth={3} />
-              </span>
-              Continue with Google
+              <Image
+                src="/social_icons/Google.png"
+                alt=""
+                width={43}
+                height={43}
+                className="h-[43px] w-[43px] object-contain"
+              />
             </button>
-          ) : (
-            // show text
-            <p className="text-center text-sm text-[#9e6b47]">
-              Google sign-in is unavailable because the server did not expose a Google auth provider.
-            </p>
-          )}
+            <button
+              type="button"
+              aria-label="Continue with Apple"
+              className="flex h-[59px] w-[59px] items-center justify-center rounded-[10px] bg-[#f6fbff] text-black"
+            >
+              <Image
+                src="/social_icons/Apple Inc.png"
+                alt=""
+                width={43}
+                height={43}
+                className="h-[43px] w-[43px] object-contain"
+              />
+            </button>
+          </div>
 
-          <button
-            onClick={() => setAuthMethod("manual")}
-            type="button"
-            className="h-12 w-full rounded-xl bg-[#f96b06] text-base font-bold tracking-wide text-[#fcfaf8] shadow-md transition-all hover:bg-[#e66105] hover:shadow-lg"
-          >
-            Use Email & Password
-          </button>
+          <p className="mt-[58px] text-center text-[20px] text-[#2d2d2d]">
+            {isSignupMode
+              ? "Already have an account?"
+              : "Don't have an account?"}{" "}
+            <Link href={alternateHref} className="font-semibold">
+              {isSignupMode ? "Log In" : "Sign Up"}
+            </Link>
+          </p>
         </div>
-      ) : (
-        <form onSubmit={handleSubmit} className="w-full max-w-[480px] space-y-4">
-          <AuthInput
-            type="email"
-            placeholder="Email"
-            icon={Mail}
-            value={email}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-              setEmail(event.target.value)
-            }
-          />
-          <AuthInput
-            type="password"
-            placeholder="Password"
-            icon={Lock}
-            value={password}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-              setPassword(event.target.value)
-            }
-          />
-
-          {error ? <p className="text-center text-sm text-red-600">{error}</p> : null}
-
-          <button
-            disabled={isSubmitting}
-            type="submit"
-            className="h-12 w-full rounded-xl bg-[#f96b06] text-base font-bold tracking-wide text-[#fcfaf8] shadow-md transition-all hover:bg-[#e66105] hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            {isSubmitting
-              ? isSignupMode
-                ? "Creating account..."
-                : "Signing in..."
-              : isSignupMode
-                ? "Sign Up"
-                : "Sign In"}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setAuthMethod("choice")}
-            className="h-12 w-full rounded-xl border border-[#e0c4b0] text-sm font-semibold text-[#1c130d] transition-all hover:bg-[#faf6f4]"
-          >
-            {isSignupMode ? "Back to Sign Up Options" : "Back to Sign In Options"}
-          </button>
-        </form>
-      )}
-    </AuthLayout>
+      </div>
+    </main>
   );
 }
 

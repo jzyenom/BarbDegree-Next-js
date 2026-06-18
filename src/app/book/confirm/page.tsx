@@ -370,7 +370,7 @@ export default function ConfirmBookingPage({
           {message && <p className="mt-3 text-sm text-center text-[#8a7560]">{message}</p>}
         </div>
 
-        <BottomNav />
+        <BottomNav activeItem="Bookings" />
       </div>
     </div>
   );

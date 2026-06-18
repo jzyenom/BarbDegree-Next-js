@@ -1,0 +1,569 @@
+import { useState } from "react";
+
+const topRated = [
+  {
+    id: 1,
+    name: "Alpha Cutz",
+    location: "Narayi, Kaduna",
+    rating: 4.7,
+    type: "Home Service",
+    image:
+      "https://api.builder.io/api/v1/image/assets/TEMP/f84b5de070f7a99a7cfc34630221c6a1b17e5edf?width=294",
+  },
+  {
+    id: 2,
+    name: "Big Daddy Salon",
+    location: "Bayan Dutse, Kaduna",
+    rating: 4.8,
+    type: "In-Shop",
+    image:
+      "https://api.builder.io/api/v1/image/assets/TEMP/a9458994644379acbf271389a7282cba850bd789?width=294",
+  },
+];
+
+const styles = ["Fades", "Low Cut", "Locs", "Beard Trim"];
+
+const barbers = [
+  {
+    id: 1,
+    name: "The Nomad Barber",
+    rating: 4.7,
+    distance: "2.5km away",
+    type: "Home Service",
+    price: "NGN 2,000",
+    image:
+      "https://api.builder.io/api/v1/image/assets/TEMP/f6bb7342ee6fc99e8b15be689a83b4d7a5e8356d?width=208",
+  },
+  {
+    id: 2,
+    name: "The Gentlemen's Lounge",
+    rating: 4.8,
+    distance: "2.4km away",
+    type: "In-Shop",
+    price: "NGN 1,500",
+    image:
+      "https://api.builder.io/api/v1/image/assets/TEMP/3e619a4a425ac8caebf0b2b8e96ed317e330463b?width=208",
+  },
+  {
+    id: 3,
+    name: "Velocity Cutz",
+    rating: 4.7,
+    distance: "4.0km away",
+    type: "Home Service",
+    price: "NGN 3,000",
+    image:
+      "https://api.builder.io/api/v1/image/assets/TEMP/0aa7da66bd44871ee2a70320eaabab684269c8f7?width=208",
+  },
+  {
+    id: 4,
+    name: "Urban Edge",
+    rating: 4.7,
+    distance: "1.8km away",
+    type: "Home Service & In-Shop",
+    price: "NGN 2,000",
+    image:
+      "https://api.builder.io/api/v1/image/assets/TEMP/ca21780aab09ea9e6748f27973bcff37a4c41d62?width=208",
+  },
+  {
+    id: 5,
+    name: "Mobile Grooming",
+    rating: 4.8,
+    distance: "2.9km away",
+    type: "Home Service",
+    price: "NGN 2,000",
+    image:
+      "https://api.builder.io/api/v1/image/assets/TEMP/0a71751195a2014d223c8ab45b76708b8f91cb26?width=208",
+  },
+];
+
+function StarIcon({ className }: { className?: string }) {
+  return (
+    <img
+      src="https://api.builder.io/api/v1/image/assets/TEMP/c31f3c2eab0ccf817952f5d4bac0f4e9f8e24825?width=24"
+      alt="star"
+      className={className ?? "w-3 h-3"}
+    />
+  );
+}
+
+export default function Index() {
+  const [activeNav, setActiveNav] = useState("home");
+  const [activeStyle, setActiveStyle] = useState("Fades");
+
+  return (
+    <div className="min-h-screen bg-[#FFFFFE] flex justify-center">
+      <div className="w-full max-w-[430px] relative pb-28 font-[Manrope]">
+
+        {/* Status Bar */}
+        <div className="flex items-center justify-between px-6 pt-7 pb-1">
+          <span className="font-[Inter] font-normal text-base text-black">4:21</span>
+          <div className="flex items-center gap-2">
+            <img
+              src="https://api.builder.io/api/v1/image/assets/TEMP/7e495ed297574680064f1c46f4cd022ed9c3574a?width=30"
+              alt="Signal"
+              className="w-[15px] h-[15px]"
+            />
+            <img
+              src="https://api.builder.io/api/v1/image/assets/TEMP/ed4fa9dfda81e67fcc09c70cb29561e19ac6fa09?width=40"
+              alt="WiFi"
+              className="w-5 h-5"
+            />
+            <img
+              src="https://api.builder.io/api/v1/image/assets/TEMP/6dbdc23ee367c2be8d49cc88243c799bba432625?width=40"
+              alt="Battery"
+              className="w-5 h-5 rotate-90"
+            />
+          </div>
+        </div>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-3">
+          <div className="flex items-center gap-4">
+            <img
+              src="https://api.builder.io/api/v1/image/assets/TEMP/ff833380ac16655d6033d8afe8ee803ed27548ba?width=100"
+              alt="Profile"
+              className="w-[50px] h-[50px] rounded-full object-cover flex-shrink-0"
+            />
+            <div>
+              <p className="font-bold text-base text-[#212020] leading-tight">Morning, David.</p>
+              <p className="font-normal text-xs text-[#50504F] leading-tight mt-0.5">Narayi, Kaduna.</p>
+            </div>
+          </div>
+          <img
+            src="https://api.builder.io/api/v1/image/assets/TEMP/c3d39e5ae79c72f45fc903bf9e38a6ddd1adff05?width=50"
+            alt="Notification"
+            className="w-[25px] h-[25px]"
+          />
+        </div>
+
+        {/* Search Bar */}
+        <div className="flex items-center gap-3 px-6 mt-2">
+          <div className="flex items-center gap-3 flex-1 bg-[#F7F6F9] rounded-[10px] h-10 px-4">
+            <img
+              src="https://api.builder.io/api/v1/image/assets/TEMP/cc0eddfa94c5ee9128ff6255b0b20fe00bedc9da?width=60"
+              alt="Search"
+              className="w-[22px] h-[22px] flex-shrink-0"
+            />
+            <span className="text-[#50504F] text-xs font-normal">Search...</span>
+          </div>
+          <button className="w-[49px] h-10 rounded-[10px] bg-[#212020] flex items-center justify-center flex-shrink-0">
+            <img
+              src="https://api.builder.io/api/v1/image/assets/TEMP/b57da5b78a1c71e24ad50b08f658652abd22b1e6?width=50"
+              alt="Filter"
+              className="w-[22px] h-[22px]"
+            />
+          </button>
+        </div>
+
+        {/* Top Rated Near You */}
+        <div className="mt-6 px-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-bold text-base text-[#212020]">Top Rated Near You</h2>
+            <div className="flex items-center gap-1">
+              <button className="w-5 h-5 flex items-center justify-center">
+                <img
+                  src="https://api.builder.io/api/v1/image/assets/TEMP/5d5c14bc128c8d7760d19ecc9347e77404c3b3b6?width=40"
+                  alt="Previous"
+                  className="w-5 h-5"
+                />
+              </button>
+              <button className="w-5 h-5 flex items-center justify-center">
+                <img
+                  src="https://api.builder.io/api/v1/image/assets/TEMP/23b9193492cc1e89115922887154d866c0d5aa8b?width=40"
+                  alt="Next"
+                  className="w-5 h-5"
+                />
+              </button>
+            </div>
+          </div>
+
+          {/* Cards horizontal scroll */}
+          <div className="flex gap-4 overflow-x-auto pb-2 -mx-6 px-6 scrollbar-hide">
+            {topRated.map((shop) => (
+              <div
+                key={shop.id}
+                className="flex-shrink-0 w-[167px] border border-[#C2C2C1] rounded-[15px] overflow-hidden"
+              >
+                <div className="relative">
+                  <img
+                    src={shop.image}
+                    alt={shop.name}
+                    className="w-[147px] h-[143px] rounded-xl object-cover m-[10px]"
+                  />
+                  <div className="absolute bottom-[14px] right-[14px] bg-white rounded-[5px] px-[6px] py-[3px] flex items-center gap-1">
+                    <StarIcon className="w-3 h-3" />
+                    <span className="text-[#212020] text-[10px] font-medium">{shop.rating}</span>
+                  </div>
+                </div>
+                <div className="px-[10px] pb-3">
+                  <p className="font-bold text-xs text-[#212020] mt-1">{shop.name}</p>
+                  <p className="font-medium text-[10px] text-[#212020] mt-0.5">{shop.location}</p>
+                  <div className="mt-2">
+                    <span className="inline-block bg-[#F4F4F0] rounded-[5px] px-2 py-[3px] text-[#50504F] text-[10px] font-bold">
+                      {shop.type}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Explore Styles */}
+        <div className="mt-6 px-6">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-bold text-base text-[#212020]">Explore Styles</h2>
+            <div className="flex items-center gap-1">
+              <button className="w-5 h-5 flex items-center justify-center">
+                <img
+                  src="https://api.builder.io/api/v1/image/assets/TEMP/5d5c14bc128c8d7760d19ecc9347e77404c3b3b6?width=40"
+                  alt="Previous"
+                  className="w-5 h-5"
+                />
+              </button>
+              <button className="w-5 h-5 flex items-center justify-center">
+                <img
+                  src="https://api.builder.io/api/v1/image/assets/TEMP/23b9193492cc1e89115922887154d866c0d5aa8b?width=40"
+                  alt="Next"
+                  className="w-5 h-5"
+                />
+              </button>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-6 px-6 scrollbar-hide">
+            {styles.map((style) => (
+              <button
+                key={style}
+                onClick={() => setActiveStyle(style)}
+                className={`flex-shrink-0 h-[23px] px-3 rounded-lg border font-[Inter] text-xs font-semibold text-[#212020] whitespace-nowrap transition-colors ${
+                  activeStyle === style
+                    ? "border-[#212020] bg-[#212020] text-white"
+                    : "border-[#C2C2C1] bg-transparent"
+                }`}
+              >
+                {style}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Available Barbers */}
+        <div className="mt-6 px-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-bold text-base text-[#212020]">Available Barbers</h2>
+            <button className="text-[#50504F] text-[10px] font-bold">See All</button>
+          </div>
+
+          <div className="flex flex-col">
+            {barbers.map((barber, index) => (
+              <div key={barber.id}>
+                <div className="flex items-center gap-4 py-4">
+                  <img
+                    src={barber.image}
+                    alt={barber.name}
+                    className="w-[104px] h-20 rounded-lg object-cover flex-shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-sm text-[#212020] leading-tight">{barber.name}</p>
+                    <div className="flex items-center gap-1 mt-1">
+                      <StarIcon className="w-3 h-3 flex-shrink-0" />
+                      <span className="text-[#212020] text-[10px] font-medium">
+                        {barber.rating} &nbsp;•&nbsp; {barber.distance}
+                      </span>
+                    </div>
+                    <p className="text-[#50504F] text-[10px] font-bold mt-1">{barber.type}</p>
+                    <p className="text-[#212020] text-[10px] mt-1">
+                      <span className="font-normal">From </span>
+                      <span className="font-bold text-xs">{barber.price}</span>
+                    </p>
+                  </div>
+                  <button className="text-[#50504F] text-[10px] font-bold flex-shrink-0">View</button>
+                </div>
+                {index < barbers.length - 1 && (
+                  <div className="h-px bg-[#C2C2C1]" />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom Navigation */}
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50">
+          <div className="flex items-center gap-4 bg-[#212020] rounded-[25px] px-6 h-[46px]">
+            <button
+              onClick={() => setActiveNav("home")}
+              className="w-[25px] h-[25px] flex items-center justify-center"
+            >
+              <img
+                src="https://api.builder.io/api/v1/image/assets/TEMP/9b9ed2c9531709966a73f88de45650ec9c873c7c?width=50"
+                alt="Home"
+                className="w-[25px] h-[25px]"
+              />
+            </button>
+            <button
+              onClick={() => setActiveNav("calendar")}
+              className="w-[25px] h-[25px] flex items-center justify-center"
+            >
+              <img
+                src="https://api.builder.io/api/v1/image/assets/TEMP/a2374257a7cb46abbe9638645f8426da65d559f4?width=50"
+                alt="Calendar"
+                className="w-[25px] h-[25px]"
+              />
+            </button>
+            <button
+              onClick={() => setActiveNav("chat")}
+              className="w-[25px] h-[25px] flex items-center justify-center"
+            >
+              <img
+                src="https://api.builder.io/api/v1/image/assets/TEMP/360fba0d66753b03ad2637557585c5aee58eb75d?width=50"
+                alt="Chat"
+                className="w-[25px] h-[25px]"
+              />
+            </button>
+            <button
+              onClick={() => setActiveNav("profile")}
+              className="w-[25px] h-[25px] flex items-center justify-center"
+            >
+              <img
+                src="https://api.builder.io/api/v1/image/assets/TEMP/9cff7bc6890b56e49a6202f4cbbf524291e0fe8f?width=50"
+                alt="Profile"
+                className="w-[25px] h-[25px]"
+              />
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+```
+
+**client/global.css** - Styles & Theme
+```css
+/** @import must precede all other statements */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /**
+   * Tailwind CSS theme
+   * tailwind.config.ts expects the following color variables to be expressed as HSL values.
+   * A different format will require also updating the theme in tailwind.config.ts.
+  */
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 1% 13%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Manrope', -apple-system, Roboto, Helvetica, sans-serif;
+  }
+
+  :where(p, span, li, h1, h2, h3, h4, h5, h6, a, button, label, td, th) {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  pre,
+  code {
+    overflow-x: auto;
+    white-space: pre;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+```
+
+**tailwind.config.ts** - Tailwind Configuration
+```typescript
+import type { Config } from "tailwindcss";
+
+export default {
+  darkMode: ["class"],
+  content: ["./client/**/*.{ts,tsx}"],
+  prefix: "",
+  theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
+    extend: {
+      colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        sidebar: {
+          DEFAULT: "hsl(var(--sidebar-background))",
+          foreground: "hsl(var(--sidebar-foreground))",
+          primary: "hsl(var(--sidebar-primary))",
+          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
+          accent: "hsl(var(--sidebar-accent))",
+          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+          border: "hsl(var(--sidebar-border))",
+          ring: "hsl(var(--sidebar-ring))",
+        },
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+      keyframes: {
+        "accordion-down": {
+          from: {
+            height: "0",
+          },
+          to: {
+            height: "var(--radix-accordion-content-height)",
+          },
+        },
+        "accordion-up": {
+          from: {
+            height: "var(--radix-accordion-content-height)",
+          },
+          to: {
+            height: "0",
+          },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+      },
+    },
+  },
+  plugins: [require("tailwindcss-animate")],
+} satisfies Config;

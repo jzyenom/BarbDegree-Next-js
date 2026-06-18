@@ -248,7 +248,7 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        <BottomNav />
+        <BottomNav activeItem="Bookings" />
       </div>
     </div>
   );

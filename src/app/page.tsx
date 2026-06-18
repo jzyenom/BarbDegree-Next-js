@@ -3,134 +3,82 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import HomeHeader from "@/components/HomeHeader";
-import SearchBar from "@/components/SearchBar";
-import HeroBanner from "@/components/HeroBanner";
-import FilterChips from "@/components/FilterChips";
-import BarberCard from "@/components/BarberCard";
-import BottomNav from "@/components/BottomNav";
+import Image from "next/image";
+import ClientMarketplaceHome from "@/components/ClientMarketplaceHome";
 import Link from "next/link";
 
-type BarberListItem = {
-  _id: string;
-  name: string;
-  address?: string;
-  state?: string;
-  country?: string;
-  location?: string;
-  rating?: number | null;
-  reviews?: number;
-  badges?: string[];
-  charge?: string | number;
-  avatar?: string;
-  bookable?: boolean;
-};
+function LandingEntry() {
+  return (
+    <main className="min-h-[100svh] bg-[#1f1f1f] text-white">
+      <div className="mx-auto flex min-h-[100svh] w-full max-w-[556px] flex-col bg-[#1f1f1f]">
+        <section className="relative h-[60.1svh] min-h-[420px] overflow-hidden bg-[#1f1f1f]">
+          <Image
+            src="/Splash_Image.png"
+            alt="Barber ready to deliver a premium grooming service"
+            fill
+            priority
+            className="object-cover object-[52%_8%]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-black/5 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-b from-transparent via-[#1f1f1f]/45 to-[#1f1f1f]" />
+        </section>
+
+        <section className="flex flex-1 flex-col items-center px-[34px] pb-[74px] pt-[52px] text-center">
+          <h1 className="text-[43px] font-normal leading-none tracking-normal text-white">
+            SHARP
+          </h1>
+          <p className="mt-[18px] text-[24px] font-medium leading-tight text-white/90">
+            Premium grooming, delivered.
+          </p>
+
+          <div className="mt-[56px] flex w-full flex-col gap-[23px]">
+            <Link
+              href="/login?mode=signup&role=client"
+              className="flex h-[82px] w-full items-center justify-center rounded-full bg-white px-6 text-[29px] font-semibold leading-none text-[#242424] transition-transform active:scale-[0.98]"
+            >
+              Find a Barber
+            </Link>
+            <Link
+              href="/login?mode=signup&role=barber"
+              className="flex h-[84px] w-full items-center justify-center rounded-full bg-[#5d5d5b] px-6 text-[28px] font-semibold leading-none text-white transition-transform active:scale-[0.98]"
+            >
+              Join as a Barber
+            </Link>
+          </div>
+        </section>
+      </div>
+    </main>
+  );
+}
 
 
 export default function ClientHome() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [barbers, setBarbers] = useState<BarberListItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
     if (status === "authenticated" && session?.user?.role) {
       const role = session.user.role;
       if (role === "barber" || role === "admin" || role === "superadmin") {
+        setRedirecting(true);
         router.replace(`/dashboard/${role}`);
         return;
       }
     }
   }, [router, session?.user?.role, status]);
 
-  useEffect(() => {
-    let mounted = true;
+  if (status === "unauthenticated") {
+    return <LandingEntry />;
+  }
 
-    
-    const loadBarbers = async () => {
-      try {
-        const res = await fetch("/api/barbers");
-        const json = await res.json();
-        if (!res.ok) {
-          throw new Error(json.error ?? "Failed to load barbers");
-        }
-        if (mounted) {
-          setBarbers(json.barbers ?? []);
-        }
-      } catch (err) {
-        if (mounted) {
-          setError(
-            err instanceof Error ? err.message : "Failed to load barbers"
-          );
-        }
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
+  if (status === "loading" || redirecting) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#202020] text-white">
+        <p className="text-sm font-semibold">Loading...</p>
+      </div>
+    );
+  }
 
-    loadBarbers();
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  return (
-    <div className="flex flex-col min-h-screen bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark pb-24">
-      <HomeHeader />
-      {/* show main content */}
-      <main className="flex flex-col gap-4">
-        <div className="px-4">
-          <Link
-            href="/bookings"
-            className="inline-flex items-center justify-center w-full h-11 rounded-lg border border-[#f2800d] text-[#f2800d] font-bold"
-          >
-            View My Bookings
-          </Link>
-        </div>
-        <SearchBar placeholder="Search barbers, styles, location..." />
-        <HeroBanner />
-        <FilterChips />
-        <section className="px-4">
-          <h2 className="text-lg font-bold mb-2">Top Barbers Nearby</h2>
-          {loading && (
-            // show text
-            <p className="text-sm text-gray-500">Loading barbers...</p>
-          )}
-          {!loading && error && (
-            // show text
-            <p className="text-sm text-red-600">{error}</p>
-          )}
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,158px),1fr))] gap-4">
-            {!loading &&
-              !error &&
-              barbers.map((barber) => {
-                const location =
-                  barber.location?.trim() ||
-                  barber.address?.trim() ||
-                  [barber.state, barber.country].filter(Boolean).join(", ");
-                const charge = barber.charge ? Number(barber.charge) : null;
-
-                return (
-                  <BarberCard
-                    key={barber._id}
-                    name={barber.name}
-                    location={location}
-                    price={Number.isNaN(charge) ? null : charge}
-                    rating={barber.rating}
-                    reviews={barber.reviews}
-                    badges={barber.badges}
-                    image={barber.avatar || ""}
-                    href={`/book?barberId=${barber._id}`}
-                    profileHref={`/barbers/${barber._id}`}
-                    bookable={barber.bookable}
-                  />
-                );
-              })}
-          </div>
-        </section>
-      </main>
-      <BottomNav />
-    </div>
-  );
+  return <ClientMarketplaceHome />;
 }

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Calendar, Home, Mail, MapPin, Phone, User } from "lucide-react";
+import { Home, Mail, MapPin, Phone, User } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import PageHeader from "@/components/ui/PageHeader";
 import LogoutButton from "@/components/LogoutButton";
@@ -162,15 +162,7 @@ export default function ClientProfilePage() {
         )}
       </main>
 
-      <BottomNav
-        variant="light"
-        activeItem="Profile"
-        items={[
-          { name: "Home", icon: Home, href: "/dashboard/client" },
-          { name: "Book", icon: Calendar, href: "/book" },
-          { name: "Profile", icon: User, href: "/dashboard/client/profile" },
-        ]}
-      />
+      <BottomNav activeItem="Profile" />
     </div>
   );
 }

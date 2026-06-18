@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import HeaderBack from "@/components/ui/HeaderBack";
+import BottomNav from "@/components/BottomNav";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchBookings } from "@/features/bookings/bookingsSlice";
 
@@ -16,7 +17,7 @@ export default function ClientBookingsPage() {
   }, [dispatch]);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white pb-28">
       <HeaderBack title="My Bookings" />
 
       <div className="p-4 space-y-4">
@@ -38,6 +39,7 @@ export default function ClientBookingsPage() {
             </div>
           ))}
       </div>
+      <BottomNav activeItem="Bookings" />
     </div>
   );
 }

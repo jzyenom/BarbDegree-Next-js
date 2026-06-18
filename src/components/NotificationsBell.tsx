@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Bell } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -16,7 +17,19 @@ function extractBookingId(notification: Notification | null): string {
 }
 
 
-export default function NotificationsBell() {
+type NotificationsBellProps = {
+  buttonClassName?: string;
+  iconClassName?: string;
+  dotClassName?: string;
+  useAssetIcon?: boolean;
+};
+
+export default function NotificationsBell({
+  buttonClassName = "relative p-2 rounded-full",
+  iconClassName = "w-5 h-5",
+  dotClassName = "absolute top-2 right-2 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-background-light dark:ring-background-dark",
+  useAssetIcon = false,
+}: NotificationsBellProps) {
   const [open, setOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const dispatch = useAppDispatch();
@@ -43,13 +56,23 @@ export default function NotificationsBell() {
     <div className="relative">
       <button
         onClick={() => setOpen((prev) => !prev)}
-        className="relative p-2 rounded-full"
+        className={buttonClassName}
         aria-label="Notifications"
       >
-        <Bell className="w-5 h-5" />
+        {useAssetIcon ? (
+          <Image
+            src="/assets/notification-18.png"
+            alt=""
+            width={25}
+            height={25}
+            className={iconClassName}
+          />
+        ) : (
+          <Bell className={iconClassName} />
+        )}
         {unreadCount > 0 && (
           // show inline text
-          <span className="absolute top-2 right-2 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-background-light dark:ring-background-dark" />
+          <span className={dotClassName} />
         )}
       </button>
 

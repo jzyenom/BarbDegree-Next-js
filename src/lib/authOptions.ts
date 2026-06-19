@@ -15,6 +15,8 @@ import User from "@/models/User";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASSWORD_SALT_ROUNDS = 10;
+const isProduction = process.env.NODE_ENV === "production";
+const shouldLogAuthDebug = !isProduction || process.env.AUTH_DEBUG === "1";
 
 const authBaseUrl = getAuthBaseUrl() ?? "http://localhost:3000";
 const authSecret = getNextAuthSecret();
@@ -54,6 +56,12 @@ function mapErrorToLogMetadata(error: unknown) {
   return { error };
 }
 
+function authDebug(message: string, ...metadata: unknown[]) {
+  if (shouldLogAuthDebug) {
+    console.info(message, ...metadata);
+  }
+}
+
 const providers: NextAuthOptions["providers"] = [
   CredentialsProvider({
     name: "Credentials",
@@ -69,7 +77,7 @@ const providers: NextAuthOptions["providers"] = [
       const intent = credentials?.intent === "signup" ? "signup" : "signin";
       const submittedName = credentials?.name?.trim().slice(0, 120);
 
-      console.log("[auth][credentials] Authorize called for", redactEmail(email), "intent:", intent);
+      authDebug("[auth][credentials] Authorize called for", redactEmail(email), "intent:", intent);
 
       if (
         !email ||
@@ -113,13 +121,12 @@ const providers: NextAuthOptions["providers"] = [
 
       if (!existingUser) {
         if (intent !== "signup") {
-          console.log("[auth][credentials] Signin failed: user not found");
-          console.info("[auth][credentials] Sign-in failed because user was not found.", {
+          authDebug("[auth][credentials] Sign-in failed because user was not found.", {
             email: redactEmail(email),
           });
           return null;
         }
-        console.log("[auth][credentials] Creating user for", redactEmail(email));
+        authDebug("[auth][credentials] Creating user for", redactEmail(email));
 
         const derivedName = submittedName || email.split("@")[0];
         const hashedPassword = await bcrypt.hash(password, PASSWORD_SALT_ROUNDS);
@@ -131,7 +138,7 @@ const providers: NextAuthOptions["providers"] = [
             password: hashedPassword,
           });
 
-          console.log("[auth][credentials] Authorize success for", redactEmail(email));
+          authDebug("[auth][credentials] Authorize success for", redactEmail(email));
           return {
             id: createdUser._id.toString(),
             email: createdUser.email,
@@ -156,8 +163,7 @@ const providers: NextAuthOptions["providers"] = [
       }
 
       if (!existingUser.password) {
-        console.log("[auth][credentials] Signin blocked: passwordless account");
-        console.info("[auth][credentials] Sign-in blocked for passwordless account.", {
+        authDebug("[auth][credentials] Sign-in blocked for passwordless account.", {
           email: redactEmail(email),
         });
         return null;
@@ -165,14 +171,13 @@ const providers: NextAuthOptions["providers"] = [
 
       const isValid = await bcrypt.compare(password, existingUser.password);
       if (!isValid) {
-        console.log("[auth][credentials] Signin failed: password mismatch");
-        console.info("[auth][credentials] Sign-in failed because password mismatch.", {
+        authDebug("[auth][credentials] Sign-in failed because password mismatch.", {
           email: redactEmail(email),
         });
         return null;
       }
 
-      console.log("[auth][credentials] Authorize success for", redactEmail(email));
+      authDebug("[auth][credentials] Authorize success for", redactEmail(email));
       return {
         id: existingUser._id.toString(),
         email: existingUser.email,
@@ -193,7 +198,7 @@ if (googleOAuth.enabled) {
   );
 }
 
-console.info("[auth] Initializing auth configuration.", {
+authDebug("[auth] Initializing auth configuration.", {
   authBaseUrl: authBaseUrl ?? "auto",
   googleEnabled: googleOAuth.enabled,
   nodeEnv: process.env.NODE_ENV,
@@ -218,7 +223,7 @@ export const authOptions: NextAuthOptions = {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: process.env.NODE_ENV === "production",
+        secure: isProduction,
         maxAge: 30 * 24 * 60 * 60,
       },
     },
@@ -231,7 +236,7 @@ export const authOptions: NextAuthOptions = {
       console.warn(`[next-auth][${code}]`);
     },
     debug(code, metadata) {
-      if (process.env.NODE_ENV !== "production") {
+      if (!isProduction) {
         console.debug(`[next-auth][${code}]`, metadata);
       }
     },
@@ -249,7 +254,7 @@ export const authOptions: NextAuthOptions = {
           : undefined;
       const authEmail = (callbackEmail || credentialEmail || user.email)?.trim().toLowerCase();
 
-      console.log("[auth] signIn called for provider:", provider, "email:", redactEmail(authEmail));
+      authDebug("[auth] signIn called for provider:", provider, "email:", redactEmail(authEmail));
 
       if (!authEmail) {
         console.warn("[auth] Blocked sign-in because provider returned no email.", {
@@ -268,7 +273,7 @@ export const authOptions: NextAuthOptions = {
         const existingUser = await User.findOne({ email: authEmail }).select("_id role");
 
         if (!existingUser) {
-          console.log("[auth] Creating user for OAuth", redactEmail(authEmail));
+          authDebug("[auth] Creating user for OAuth", redactEmail(authEmail));
           const createdUser = await User.create({
             name: user.name ?? authEmail.split("@")[0],
             email: authEmail,
@@ -278,7 +283,7 @@ export const authOptions: NextAuthOptions = {
           user.id = createdUser._id.toString();
           user.role = createdUser.role;
         } else {
-          console.log("[auth] OAuth signin for existing user", redactEmail(authEmail));
+          authDebug("[auth] OAuth signin for existing user", redactEmail(authEmail));
           user.id = existingUser._id.toString();
           user.role = existingUser.role;
         }

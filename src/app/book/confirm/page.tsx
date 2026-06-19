@@ -336,7 +336,6 @@ export default function ConfirmBookingPage({
         <DetailRow icon={<Clock size={24} />} label="Time" value={new Date(payload.dateTime).toLocaleTimeString()} />
         <DetailRow icon={<MapPin size={24} />} label="Address" value={payload.address || "Not provided"} />
         <DetailRow icon={<DollarSign size={24} />} label="Estimated Price" value={formatNaira(payload.estimatedPrice)} />
-      </div>
 
         <div className="px-4 py-3">
           <div className="grid grid-cols-3 gap-2">

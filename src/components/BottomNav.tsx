@@ -86,7 +86,8 @@ export default function BottomNav({
 
   return (
     <nav
-      className={`fixed bottom-[calc(env(safe-area-inset-bottom)+12px)] left-1/2 z-50 h-11 max-w-[calc(100vw-32px)] -translate-x-1/2 rounded-[24px] bg-[#212020] px-5 shadow-[0_10px_24px_rgba(0,0,0,0.22)] ${className}`}
+      className={`fixed left-1/2 z-50 h-11 max-w-[calc(100vw-32px)] -translate-x-1/2 rounded-[24px] bg-[#212020] px-5 shadow-[0_10px_24px_rgba(0,0,0,0.22)] ${className}`}
+      style={{ bottom: "calc(env(safe-area-inset-bottom) + 12px)" }}
       aria-label="Primary navigation"
     >
       <div className="flex h-full items-center gap-4">

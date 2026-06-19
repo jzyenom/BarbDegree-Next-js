@@ -213,7 +213,6 @@ export default function CheckoutPage() {
           // show text
           <p className="px-4 pt-4 text-sm text-[#8a7560]">{message}</p>
         )}
-      </div>
 
         <div className="px-4 py-3">
           <div className="grid grid-cols-3 gap-2">
